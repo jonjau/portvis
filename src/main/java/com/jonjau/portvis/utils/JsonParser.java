@@ -12,13 +12,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  */
 public class JsonParser {
 
-    public static <T> T toObject(String json, Class<T> object)
-            throws IOException {
+    public static <T> T toObject(String json, Class<T> object) throws IOException {
         return JSON_PARSER.readValue(json, object);
     }
 
-    public static String toJson(Object object) 
-            throws JsonProcessingException {
+    public static String toJson(Object object) throws JsonProcessingException {
         return JSON_PARSER.writeValueAsString(object);
     }
 
