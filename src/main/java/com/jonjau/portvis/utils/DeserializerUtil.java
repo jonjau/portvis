@@ -15,13 +15,14 @@ import com.jonjau.portvis.timeseries.MetaData;
 
 /**
  * DeserializerHelper
+ * Utility Class
  */
-public class DeserializerHelper {
+public final class DeserializerUtil {
 
     /**
      * 
      * @param jsonNode
-     * @return TODO: JAVADOC
+     * @return TODO: JAVADOCS
      */
     public static Map<String, Object> sanitizeNodeKeys(JsonNode jsonNode) {
         Map<String, Object> sanitizedNodes = new HashMap<>();
@@ -68,6 +69,7 @@ public class DeserializerHelper {
 
     private static Date parseDate(String dateString)
             throws ParseException {
+        // expect either date string or date-time string
         Date date = DATE_PARSER.parse(dateString);
         if (dateString.length() > DATE_FORMAT.length()) {
             date = DATE_TIME_PARSER.parse(dateString);
@@ -80,6 +82,6 @@ public class DeserializerHelper {
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:SS";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    private static final SimpleDateFormat DATE_TIME_PARSER = new SimpleDateFormat(DATE_FORMAT);
-    private static final SimpleDateFormat DATE_PARSER = new SimpleDateFormat(DATE_TIME_FORMAT);
+    private static final SimpleDateFormat DATE_TIME_PARSER = new SimpleDateFormat(DATE_TIME_FORMAT);
+    private static final SimpleDateFormat DATE_PARSER = new SimpleDateFormat(DATE_FORMAT);
 }

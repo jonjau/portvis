@@ -1,5 +1,6 @@
 package com.jonjau.portvis.timeseries;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -14,10 +15,14 @@ public class MetaData {
   private String information;
   @JsonProperty("Symbol")
   private String symbol;
+  @JsonProperty("Output Size")
+  private String outputSize;
   @JsonProperty("Time Zone")
   private String timezone;
   @JsonProperty("Last Refreshed")
   private String lastRefreshed;
+  @JsonProperty("Interval")
+  private String interval;
   @JsonProperty("Notes")
   private String notes;
   @JsonProperty("From Symbol")
