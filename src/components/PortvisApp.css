@@ -1,12 +1,12 @@
 h1 {
-  color: #4caf50;
+  color: #236147;
 }
 
 ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  width: 25%;
+  width: 20%;
   background-color: #f1f1f1;
   position: fixed;
   height: 100%;
@@ -21,7 +21,7 @@ li a {
 }
 
 li a.active {
-  background-color: #4caf50;
+  background-color: #236147;
   color: white;
 }
 
