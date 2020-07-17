@@ -2,7 +2,6 @@ package com.jonjau.portvis;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpHeaders;
 
 import com.jonjau.portvis.timeseries.TimeSeriesDeserializer;
 import com.jonjau.portvis.timeseries.TimeSeriesResult;

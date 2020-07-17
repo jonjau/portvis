@@ -1,81 +1,114 @@
 package com.jonjau.portvis;
 
+import com.jonjau.portvis.data.models.Portfolio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 
-@SpringBootTest
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest(classes = PortvisApplication.class,
+                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PortvisApplicationTests {
 
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Autowired
-	public PortvisApplicationTests(TestRestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+    @LocalServerPort
+    private int port;
 
-	@Test
-	void contextLoads() {
-	}
+    private String getRootUrl() {
+        return "http://localhost:" + port;
+    }
 
-	@Test
-	public void testGetAllUsers() {
-		HttpHeaders headers = new HttpHeaders();
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+    @Test
+    void contextLoads() {
+    }
 
-		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/users",
-				HttpMethod.GET, entity, String.class);
+    @Test
+    public void testGetAllPortfolios() {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
-		assertNotNull(response.getBody());
-	}
+        ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/portfolio",
+                HttpMethod.GET, entity, String.class);
 
-	@Test
-	public void testGetUserById() {
-		User user = restTemplate.getForObject(getRootUrl() + "/users/1", User.class);
-		System.out.println(user.getFirstName());
-		assertNotNull(user);
-	}
+        assertNotNull(response.getBody());
+    }
 
-	@Test
-	public void testCreateUser() {
-		User user = new User();
-		user.setEmailId("admin@gmail.com");
-		user.setFirstName("admin");
-		user.setLastName("admin");
-		user.setCreatedBy("admin");
-		user.setUpdatedby("admin");
+    @Test
+    public void testGetPortfolioById() {
+        Portfolio portfolio = restTemplate.getForObject(
+                getRootUrl() + "/portfolio/1", Portfolio.class);
 
-		ResponseEntity<User> postResponse = restTemplate.postForEntity(getRootUrl() + "/users", user, User.class);
-		assertNotNull(postResponse);
-		assertNotNull(postResponse.getBody());
-	}
+        System.out.println(portfolio.getName());
+        assertNotNull(portfolio);
+    }
 
-	@Test
-	public void testUpdatePost() {
-		int id = 1;
-		User user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
-		user.setFirstName("admin1");
-		user.setLastName("admin2");
+    @Test
+    public void testCreatePortfolio() {
+        Portfolio portfolio = new Portfolio();
 
-		restTemplate.put(getRootUrl() + "/users/" + id, user);
+        // create random allocations, and random values
+        Map<String, Double> allocations = Stream.of(new Object[][] {
+                { "MSFT", 0.25 },
+                { "NVDA", 0.25},
+                { "AAPL", 0.5 },
+        }).collect(Collectors.toMap(data -> (String) data[0], data -> (Double) data[1]));
 
-		User updatedUser = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
-		assertNotNull(updatedUser);
-	}
+        portfolio.setInitialValue(1234.567);
+        portfolio.setName("pf1");
+        portfolio.setAllocations(allocations);
 
-	@Test
-	public void testDeletePost() {
-		int id = 2;
-		User user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
-		assertNotNull(user);
+        ResponseEntity<Portfolio> postResponse = restTemplate.postForEntity(
+                getRootUrl() + "/portfolio", portfolio, Portfolio.class);
 
-		restTemplate.delete(getRootUrl() + "/users/" + id);
+        assertNotNull(postResponse);
+        assertNotNull(postResponse.getBody());
+    }
 
-		try {
-			user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
-		} catch (final HttpClientErrorException e) {
-			assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
-		}
-	}
+    @Test
+    public void testUpdatePost() {
+        int id = 1;
+        // get a portfolio
+        Portfolio portfolio = restTemplate.getForObject(
+                getRootUrl() + "/portfolio/" + id, Portfolio.class);
+
+        // update name field
+        portfolio.setName("pf2");
+        restTemplate.put(getRootUrl() + "/portfolio/" + id, portfolio);
+
+        Portfolio updatedPortfolio = restTemplate.getForObject(
+                getRootUrl() + "/portfolio/" + id, Portfolio.class);
+
+        assertNotNull(updatedPortfolio);
+    }
+
+    @Test
+    public void testDeletePost() {
+        int id = 2;
+        // get a portfolio
+        Portfolio portfolio = restTemplate.getForObject(
+                getRootUrl() + "/portfolio/" + id, Portfolio.class);
+        assertNotNull(portfolio);
+
+        // delete the portfolio
+        restTemplate.delete(getRootUrl() + "/portfolio/" + id);
+
+        try {
+            portfolio = restTemplate.getForObject(
+                    getRootUrl() + "/portfolio/" + id, Portfolio.class);
+        } catch (final HttpClientErrorException e) {
+            assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
+        }
+    }
 }
