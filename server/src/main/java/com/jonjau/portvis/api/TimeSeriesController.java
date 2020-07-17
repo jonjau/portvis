@@ -1,25 +1,16 @@
 package com.jonjau.portvis.api;
 
-import java.io.IOException;
-import java.net.URI;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jonjau.portvis.AlphaVantageClient;
 import com.jonjau.portvis.timeseries.TimeSeriesData;
 import com.jonjau.portvis.timeseries.TimeSeriesResult;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+import java.io.IOException;
 
 /**
  * TimeSeriesController
@@ -44,7 +35,7 @@ public class TimeSeriesController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = "/query", params = { "symbol", "apikey" })
-    public TimeSeriesResult getDaily() throws IOException {
+    public TimeSeriesResult getDaily(@RequestParam("symbol") String symbol) throws IOException {
 
         //ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
             //.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024)).build();
@@ -59,7 +50,7 @@ public class TimeSeriesController {
         //String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
         //log.info(json);
 
-        TimeSeriesResult data = client.getTimeSeries();
+        TimeSeriesResult data = client.getTimeSeriesResult(symbol);
         //log.info(data.toString());
 
         return data;

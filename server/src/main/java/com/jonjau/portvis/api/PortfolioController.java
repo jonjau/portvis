@@ -27,7 +27,7 @@ public class PortfolioController {
     }
 
     @GetMapping("/portfolio/{id}")
-    public ResponseEntity<Portfolio> getUserById(
+    public ResponseEntity<Portfolio> getPortfolioById(
             @PathVariable(value = "id") Long portfolioId) throws Exception {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new Exception(
@@ -49,6 +49,8 @@ public class PortfolioController {
                         "Portfolio with ID "+ portfolioId + " not found."));
 
         portfolio.setAllocations(portfolioDetails.getAllocations());
+        portfolio.setInitialValue(portfolio.getInitialValue());
+
         final Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
 
         return ResponseEntity.ok(updatedPortfolio);

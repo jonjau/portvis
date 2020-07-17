@@ -17,7 +17,9 @@ public class Portfolio {
 
     private String name;
 
+    private double initialValue;
+
     @ElementCollection
     // change to Long maybe?
-    private Map<String, Integer> allocations = new HashMap<>();
+    private Map<String, Double> allocations = new HashMap<>();
 }

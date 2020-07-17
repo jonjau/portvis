@@ -21,8 +21,8 @@ public class AlphaVantageClient {
         JsonParser.addDeserializer(TimeSeriesResult.class, new TimeSeriesDeserializer());
     }
 
-    public TimeSeriesResult getTimeSeries() throws IOException {
-        return sendRequest("lorem ipsum", TimeSeriesResult.class);
+    public TimeSeriesResult getTimeSeriesResult(String symbol) throws IOException {
+        return sendRequest(symbol, TimeSeriesResult.class);
     }
 
     private <T> T sendRequest(String queryParamString, Class<T> resultObject) 
@@ -34,11 +34,13 @@ public class AlphaVantageClient {
         URI uri = UriComponentsBuilder.newInstance().scheme("https")
             .host("www.alphavantage.co").path("/query")
             .queryParam("function", "TIME_SERIES_DAILY")
-            .queryParam("symbol", "MSFT")
+            .queryParam("symbol", queryParamString)
             .queryParam("outputsize", "compact")
             .queryParam("apikey", "A35DBK43HPJPIB03").build().toUri();
 
+        // this is blocking code: slow
         String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
+
         return JsonParser.toObject(json, resultObject);
     }
 }
