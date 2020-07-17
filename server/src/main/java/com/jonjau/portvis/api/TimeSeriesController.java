@@ -10,8 +10,11 @@ import com.jonjau.portvis.AlphaVantageClient;
 import com.jonjau.portvis.timeseries.TimeSeriesData;
 import com.jonjau.portvis.timeseries.TimeSeriesResult;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,6 +30,7 @@ public class TimeSeriesController {
 
     private final AlphaVantageClient client;
 
+    // maybe make this Autowired
     public TimeSeriesController() {
         this.client = new AlphaVantageClient();
     }
@@ -38,14 +42,26 @@ public class TimeSeriesController {
         return null;
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = "/query", params = { "symbol", "apikey" })
     public TimeSeriesResult getDaily() throws IOException {
 
-        TimeSeriesResult data = client.getTimeSeries();
-        log.info(data.toString());
-        return data;
+        //ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+            //.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024)).build();
+        //WebClient webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).build();
+        ////WebClient webClient = WebClient.create();
+        //URI uri = UriComponentsBuilder.newInstance().scheme("https")
+            //.host("api.worldtradingdata.com").path("/api/v1/history")
+            //.queryParam("symbol", "MSFT")
+            //.queryParam("api_token", "36DBZa2FGaP0vPs11p3qihkrW3ZnVl4JpEZTzZtLGJgcyLBCqXod093xbFUB").build().toUri();
 
-        // tsdflux.subscribe(flux -> log.info(flux));
-        // return new TimeSeriesDaily(1.0,2.3,4.5,5.6,7.909090);
+        //log.info(uri.toString());
+        //String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
+        //log.info(json);
+
+        TimeSeriesResult data = client.getTimeSeries();
+        //log.info(data.toString());
+
+        return data;
     }
 }
