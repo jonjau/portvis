@@ -59,29 +59,29 @@ class StockComponent extends Component {
 
   render() {
     return (
-      <Container fluid="true" className="d-flex flex-column">
+      <Container fluid="true" className="d-flex flex-column grow">
         <Row>
-          <Col md={2} className="bg-success p-0">
+          <Col md={2} className="bg-dark p-2">
             <ListGroup variant="flush">
-              <ListGroup.Item action href="#link1" variant="info">
+              <ListGroup.Item action href="#link1" variant="dark">
                 Link 1
               </ListGroup.Item>
-              <ListGroup.Item action href="#link2" variant="info">
+              <ListGroup.Item action href="#link2" variant="dark">
                 Link 2
               </ListGroup.Item>
-              <ListGroup.Item action href="#link3" variant="info">
+              <ListGroup.Item action href="#link3" variant="dark">
                 Link 3
               </ListGroup.Item>
             </ListGroup>
           </Col>
-          <Col md={10} className="bg-light">
-            <textarea
+          {/* <textarea
               defaultValue={JSON.stringify(this.state.stockHistory.timeSeries)}
-            ></textarea>
-            <div ref="chart" />
-            <button onClick={() => this.plotHistory()}>plotHist</button>
+            ></textarea> */}
+          <Col md={10} className="p-4">
             <AllocationTable />
           </Col>
+          {/* <div ref="chart" />
+            {/* <button onClick={() => this.plotHistory()}>plotHist</button> */}
         </Row>
       </Container>
     );
@@ -89,3 +89,25 @@ class StockComponent extends Component {
 }
 
 export default StockComponent;
+
+// <body className="container-fluid d-flex flex-column">
+// <Row>
+//   <div className="col-12 bg-primary py-3">Header</div>
+//   <div className="col-4 bg-info py-3">Menu</div>
+//   <div className="main col-8 bg-warning py-3">
+//     <h4>Main</h4>
+//     <p className="mb-5">
+//       Sriracha biodiesel taxidermy organic post-ironic, Intelligentsia
+//       salvia mustache 90's code editing brunch. Butcher polaroid VHS art
+//       party, hashtag Brooklyn deep v PBR narwhal sustainable mixtape swag
+//       wolf squid tote bag. Tote bag cronut semiotics, raw denim deep v
+//       taxidermy messenger bag. Tofu YOLO Etsy, direct trade ethical Odd
+//       Future jean shorts paleo. Forage Shoreditch tousled aesthetic irony,
+//       street art organic Bushwick artisan cliche semiotics ugh synth
+//       chillwave meditation. Shabby chic lomo plaid vinyl chambray Vice.
+//       Vice sustainable cardigan, Williamsburg master cleanse hella DIY
+//       90's blog.
+//     </p>
+//   </div>
+// </Row>
+// </body>

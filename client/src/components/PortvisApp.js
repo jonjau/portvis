@@ -17,12 +17,13 @@ class PortvisApp extends Component {
           <Switch>
             <Route path="/" exact component={StockComponent} />
             <Route path="/backtest" exact component={BacktestComponent} />
-            {/* <Route render={() => <h1>404: page not found</h1>} /> */}
           </Switch>
+          <footer>footer</footer>
         </>
       </Router>
     );
   }
 }
 
+// <Route render={() => <h1>404: page not found</h1>} />
 export default PortvisApp;
