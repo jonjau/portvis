@@ -5,12 +5,13 @@ import com.jonjau.portvis.data.models.Portfolio;
 import com.jonjau.portvis.timeseries.TimeSeriesData;
 import com.jonjau.portvis.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Service
 public class Backtest {
 
     private final AlphaVantageClient client;
@@ -27,7 +28,7 @@ public class Backtest {
         this.client = client;
     }
 
-    public Map<Date, Double> simpleReturn(Portfolio portfolio, Date start, Date end)
+    public Map<Date, Double> returnsCompoundedDaily(Portfolio portfolio, Date start, Date end)
             throws IOException {
 
 //        LocalDateTime startDate = LocalDateTime.from(Instant.ofEpochMilli(start.getTime()));

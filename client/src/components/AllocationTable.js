@@ -1,15 +1,15 @@
 import React, { Component } from "react";
-import { Table } from "react-bootstrap";
+import { Table, Button } from "react-bootstrap";
 
 class AllocationTable extends Component {
   render() {
     return (
-      <Table striped bordered size="sm" hover variant="dark">
+      <Table bordered size="md" hover>
         <thead>
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
+            <th>Asset</th>
+            <th>Weighting</th>
+            <th>Allocation</th>
           </tr>
         </thead>
         <tbody>
@@ -17,11 +17,6 @@ class AllocationTable extends Component {
             <td>Mark</td>
             <td>Otto</td>
             <td>@mdo</td>
-          </tr>
-          <tr>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
           </tr>
         </tbody>
       </Table>

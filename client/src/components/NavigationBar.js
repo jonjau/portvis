@@ -7,8 +7,8 @@ function NavigationBar() {
       <Navbar.Brand href="/">Portvis</Navbar.Brand>
       <Nav className="mr-auto">
         <Nav.Link href="backtest">Backtest</Nav.Link>
-        <Nav.Link href="features">Features</Nav.Link>
-        <Nav.Link href="pricing">Pricing</Nav.Link>
+        <Nav.Link href="features">Monitor</Nav.Link>
+        <Nav.Link href="pricing">About</Nav.Link>
       </Nav>
       <Form inline>
         <FormControl

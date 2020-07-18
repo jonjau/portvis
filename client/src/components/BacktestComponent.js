@@ -61,7 +61,7 @@ class StockComponent extends Component {
     return (
       <Container fluid="true" className="d-flex flex-column">
         <Row>
-          <Col md={2} className="bg-warning p-0">
+          <Col md={2} className="bg-success p-0">
             <ListGroup variant="flush">
               <ListGroup.Item action href="#link1" variant="info">
                 Link 1
