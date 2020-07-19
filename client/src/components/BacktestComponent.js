@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import StockService from "../service/StockService";
 import Dygraph from "dygraphs";
-import { ListGroup, Row, Col, Container } from "react-bootstrap";
+import { ListGroup, Row, Col } from "react-bootstrap";
 import "./BacktestComponent.css";
 import AllocationTable from "./AllocationTable";
 
