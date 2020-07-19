@@ -59,31 +59,24 @@ class StockComponent extends Component {
 
   render() {
     return (
-      <Container fluid="true" className="d-flex flex-column grow">
-        <Row>
-          <Col md={2} className="bg-dark p-2">
-            <ListGroup variant="flush">
-              <ListGroup.Item action href="#link1" variant="dark">
-                Link 1
-              </ListGroup.Item>
-              <ListGroup.Item action href="#link2" variant="dark">
-                Link 2
-              </ListGroup.Item>
-              <ListGroup.Item action href="#link3" variant="dark">
-                Link 3
-              </ListGroup.Item>
-            </ListGroup>
-          </Col>
-          {/* <textarea
-              defaultValue={JSON.stringify(this.state.stockHistory.timeSeries)}
-            ></textarea> */}
-          <Col md={10} className="p-4">
-            <AllocationTable />
-          </Col>
-          {/* <div ref="chart" />
-            {/* <button onClick={() => this.plotHistory()}>plotHist</button> */}
-        </Row>
-      </Container>
+      <Row>
+        <Col md={2} className="bg-dark p-2 vh-100">
+          <ListGroup variant="flush">
+            <ListGroup.Item action href="#link1" variant="dark">
+              Link 1
+            </ListGroup.Item>
+            <ListGroup.Item action href="#link2" variant="dark">
+              Link 2
+            </ListGroup.Item>
+            <ListGroup.Item action href="#link3" variant="dark">
+              Link 3
+            </ListGroup.Item>
+          </ListGroup>
+        </Col>
+        <Col md={10} className="p-4">
+          <AllocationTable />
+        </Col>
+      </Row>
     );
   }
 }

@@ -11,16 +11,17 @@ import NavigationBar from "./NavigationBar";
 class PortvisApp extends Component {
   render() {
     return (
-      <Router>
-        <>
-          <NavigationBar />
-          <Switch>
-            <Route path="/" exact component={StockComponent} />
-            <Route path="/backtest" exact component={BacktestComponent} />
-          </Switch>
-          <footer>footer</footer>
-        </>
-      </Router>
+      <>
+        <NavigationBar />
+        <div className="container-fluid flex-grow-1">
+          <Router>
+            <Switch>
+              <Route path="/" exact component={StockComponent} />
+              <Route path="/backtest" exact component={BacktestComponent} />
+            </Switch>
+          </Router>
+        </div>
+      </>
     );
   }
 }
