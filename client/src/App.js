@@ -8,7 +8,6 @@ function App() {
   return (
     <div className="App d-flex flex-column flex-grow-1">
       <PortvisApp />
-      <footer className="bg-info">footer</footer>
     </div>
   );
 }

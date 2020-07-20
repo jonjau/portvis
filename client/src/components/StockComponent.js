@@ -15,7 +15,7 @@ class StockComponent extends Component {
   }
 
   componentDidMount() {
-    this.refreshStock();
+    //this.refreshStock();
   }
 
   refreshStock() {

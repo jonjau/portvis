@@ -5,7 +5,7 @@ import { ListGroup, Row, Col } from "react-bootstrap";
 import "./BacktestComponent.css";
 import AllocationTable from "./AllocationTable";
 
-class StockComponent extends Component {
+class BacktestComponent extends Component {
   constructor(props) {
     super(props);
 
@@ -62,7 +62,7 @@ class StockComponent extends Component {
       <Row>
         <Col md={2} className="bg-dark p-2 vh-100">
           <ListGroup variant="flush">
-            <ListGroup.Item action href="#link1" variant="dark">
+            <ListGroup.Item action href="#portfolio1" variant="dark">
               Link 1
             </ListGroup.Item>
             <ListGroup.Item action href="#link2" variant="dark">
@@ -81,7 +81,7 @@ class StockComponent extends Component {
   }
 }
 
-export default StockComponent;
+export default BacktestComponent;
 
 // <body className="container-fluid d-flex flex-column">
 // <Row>

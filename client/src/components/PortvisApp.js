@@ -6,21 +6,29 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import StockComponent from "./StockComponent";
 import BacktestComponent from "./BacktestComponent";
+import PortfolioComponent from "./PortfolioComponent";
 import NavigationBar from "./NavigationBar";
 
 class PortvisApp extends Component {
   render() {
     return (
       <>
-        <NavigationBar />
-        <div className="container-fluid flex-grow-1">
-          <Router>
+        <Router>
+          <NavigationBar />
+          <div className="container-fluid flex-grow-1">
             <Switch>
+              {/* paths DON'T have to be exact in this case */}
               <Route path="/" exact component={StockComponent} />
-              <Route path="/backtest" exact component={BacktestComponent} />
+              <Route path="/backtest" component={BacktestComponent} />
+              <Route path="/portfolios" component={PortfolioComponent} />
+              {/* <Route
+                path={`/portfolios/:portfolioId`}
+                render={() => <h3>dsd</h3>}
+              /> */}
             </Switch>
-          </Router>
-        </div>
+          </div>
+          <footer className="bg-info">hello my name is footer</footer>
+        </Router>
       </>
     );
   }
