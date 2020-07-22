@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Table, Button, Row, Col } from "react-bootstrap";
 
-import PortfolioService from "../service/PortfolioService";
+//import PortfolioService from "../service/PortfolioService";
 import AssetForm from "./AssetForm";
 import PortfolioDetailsForm from "./PortfolioDetailsForm";
 
@@ -11,38 +11,25 @@ class AllocationTable extends Component {
 
     this.state = {
       id: null,
-      name: null,
-      initialValue: null,
+      name: "",
+      initialValue: 0,
       assets: [],
     };
+    //console.log(`table state: ${JSON.stringify(this.state, null, 2)}`)
+    //console.log(`table props: ${JSON.stringify(props, null, 2)}`)
 
     this.addAssetClicked = this.addAssetClicked.bind(this);
     this.deleteAssetClicked = this.deleteAssetClicked.bind(this);
     this.portfolioDetailsSubmitted = this.portfolioDetailsSubmitted.bind(this);
-    this.savePortfolioClicked = this.savePortfolioClicked.bind(this);
   }
 
   componentDidMount() {
     // get the assets of the portfolio with the id portfolioId (a URL param)
-    console.log("allocationtable didmount")
-    this.getPortfolioAssets(this.props.match.params.portfolioId);
+    //console.log("allocationtable didmount");
   }
 
-  getPortfolioAssets(portfolioId) {
-    PortfolioService.getPortfolioById(portfolioId)
-      .then((response) => {
-        console.log(`received ${JSON.stringify(response.data, null, 2)}`);
-        const portfolio = response.data;
-        // map {s1: p1, s2: p2} to [{s1:p1}, {s2, p2}]
-        this.setState({
-          assets: Object.entries(
-            portfolio.allocations
-          ).map(([symbol, proportion]) => ({ symbol, proportion })),
-        });
-      })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
+  componentDidUpdate() {
+    //console.log("allocationtable didupdate");
   }
 
   addAssetClicked(newAsset) {
@@ -67,76 +54,105 @@ class AllocationTable extends Component {
     });
   }
 
-  validatePortfolio(portfolio) {
-
-  }
-
-  savePortfolioClicked() {
-
-  }
+  validatePortfolio(portfolio) {}
 
   render() {
+    // this.props or props are undefined in contructor(props).
+    // In render they aren't. Also, setting state in componentDidUpdate is a
+    // bad idea. Google "react you probably don't need derived state".
+    //console.log(this.props);
+
     // doesn't have to be called submitAction
     return (
       <>
         <Row>
           <Col>
             <PortfolioDetailsForm
-              submitAction={this.portfolioDetailsSubmitted}
+              currentPortfolio={this.props.currentPortfolio}
+              submitAction={this.props.portfolioDetailsSubmitted}
             />
           </Col>
           <Col>
             <AssetForm
-              submitAction={this.addAssetClicked}
-              assetSymbols={this.state.assets.map((asset) => asset.symbol)}
+              submitAction={this.props.addAssetClicked}
+              // turn {s1: p1, s2: p2} to [s1, s2]
+              assetSymbols={Object.keys(
+                this.props.currentPortfolio.allocations
+              )}
             />
           </Col>
         </Row>
         <Row>
-        <Table bordered hover className="col-9 table-condensed">
-          <thead>
-            <tr className="d-flex">
-              <th className="col-3">Asset</th>
-              <th className="col-3">Proportion</th>
-              <th className="col-3">Allocation (USD)</th>
-              <th className="col-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.assets.map((asset) => (
-              // symbol must be unique! Validate this with Formik
-              // https://reactjs.org/docs/lists-and-keys.html#keys
-              <tr className="d-flex" key={asset.symbol}>
-                <td className="col-3">{asset.symbol}</td>
-                <td className="col-3">{`${asset.proportion * 100}%`}</td>
-                <td className="col-3">{`${
-                  asset.proportion * this.state.initialValue
-                }`}</td>
-                <td className="col-3">
-                  <Button
-                    className="btn-danger"
-                    onClick={() => this.deleteAssetClicked(asset.symbol)}
-                  >
-                    Delete
-                  </Button>
-                </td>
+          <Table bordered hover className="col-9 table-condensed">
+            <thead>
+              <tr className="d-flex">
+                <th className="col-3">Asset</th>
+                <th className="col-3">Proportion</th>
+                <th className="col-3">Allocation (USD)</th>
+                <th className="col-3"></th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {Object.entries(this.props.currentPortfolio.allocations).map(
+                ([symbol, proportion]) => (
+                  // symbol must be unique! Validate this with Formik
+                  // https://reactjs.org/docs/lists-and-keys.html#keys
+                  <tr className="d-flex" key={symbol}>
+                    <td className="col-3">{symbol}</td>
+                    <td className="col-3">{`${proportion * 100}%`}</td>
+                    <td className="col-3">{`${(
+                      proportion * this.props.currentPortfolio.initialValue
+                    ).toFixed(2)}`}</td>
+                    <td className="col-3">
+                      <Button
+                        className="btn-danger"
+                        onClick={() => this.props.deleteAssetClicked(symbol)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </Table>
         </Row>
-        <Row>
-        <Button className="m-2 btn-success" onClick={this.savePortfolioClicked}>
-          Save changes to portfolio
-        </Button>
-        <Button className="m-2 btn-danger" onClick={this.savePortfolioClicked}>
-          Delete this portfolio
-        </Button>
-        </Row>
-        <Button onClick={() => console.log(this.state)}>debug state</Button>
+
       </>
     );
   }
 }
 
 export default AllocationTable;
+
+// getPortfolioAssets(portfolioId) {
+//   PortfolioService.getPortfolioById(portfolioId)
+//     .then((response) => {
+//       console.log(`received ${JSON.stringify(response.data, null, 2)}`);
+//       const portfolio = response.data;
+//       // map {s1: p1, s2: p2} to [{s1:p1}, {s2, p2}]
+//       this.setState({
+//         assets: Object.entries(
+//           portfolio.allocations
+//         ).map(([symbol, proportion]) => ({ symbol, proportion })),
+//       });
+//     })
+//     .catch((error) =>
+//       console.log(`error: ${JSON.stringify(error, null, 2)}`)
+//     );
+// }
+
+// const { currentPortfolio, match } = this.props;
+// console.log(JSON.stringify(currentPortfolio, null, 2));
+
+// // mapping {s1: p1, s2: p2} to [{s1:p1}, {s2, p2}]
+// const currentPortfolioAssets = Object.entries(
+//   currentPortfolio.allocations
+// ).map(([symbol, proportion]) => ({ symbol, proportion }));
+
+// this.setState({
+//   id: match.url,
+//   name: currentPortfolio.name,
+//   initialValue: currentPortfolio.initialValue,
+//   assets: currentPortfolioAssets,
+// });

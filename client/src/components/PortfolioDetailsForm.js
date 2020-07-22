@@ -6,13 +6,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 function PortfolioDetailsForm(props) {
+  // FIXME: input error messages not popping up
   //TODO: validation, portfolio initial value
   // this is a React hook, works for functional components, like this one.
 
   const formik = useFormik({
     initialValues: {
-      portfolioName: null,
-      initialValue: null,
+      portfolioName: props.currentPortfolio.name,
+      initialValue: props.currentPortfolio.initialValue,
     },
     // need to pass in current asset symbols in portfolio for validation
     // this is probably not the best way to do it.
@@ -31,9 +32,13 @@ function PortfolioDetailsForm(props) {
         .max(1_000_000_000_000, "Must be between 0 and 1 trillion"),
     }),
     onSubmit: (values) => {
-      props.submitAction(values);
-      console.log(formik.isValid, values);
+      console.log("portdetsubmit");
+      props.submitAction({
+        portfolioName: values.portfolioName,
+        initialValue: Number(values.initialValue)
+      });
     },
+    enableReinitialize: true
   });
 
   // `name` in a Form.Control (like HTML's <input>) identifies what the
@@ -44,7 +49,7 @@ function PortfolioDetailsForm(props) {
       <Card.Header>Edit portfolio details</Card.Header>
       <Card.Body>
         <Form
-          onSubmit={formik.handleSubmit}
+          //onSubmit={formik.handleSubmit}
           // also submit when form is blurred
           onBlur={formik.handleSubmit}
         >
@@ -57,7 +62,8 @@ function PortfolioDetailsForm(props) {
                 <Form.Control
                   id="inputPortfolioName"
                   name="portfolioName"
-                  placeholder="e.g. test1"
+                  type="text"
+                  value={formik.values.portfolioName}
                   onChange={formik.handleChange}
                 />
               </InputGroup>
@@ -79,7 +85,7 @@ function PortfolioDetailsForm(props) {
                 <FormControl
                   id="inputInitialValue"
                   name="initialValue"
-                  placeholder="e.g. 1000"
+                  value={formik.values.initialValue}
                   onChange={formik.handleChange}
                 />
               </InputGroup>

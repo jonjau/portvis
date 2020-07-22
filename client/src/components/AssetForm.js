@@ -33,6 +33,7 @@ function AssetForm(props) {
           `Asset already exists in portfolio`,
           function (value) {
             // true if valid, false if error
+            //FIXME: message not appearing
             return !props.assetSymbols.includes(value);
           }
         ),
@@ -48,6 +49,7 @@ function AssetForm(props) {
         proportion: Number(values.proportion),
       });
     },
+    enableReinitialize: true
   });
 
   // `name` in a Form.Control (like HTML's <input>) identifies what the

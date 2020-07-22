@@ -11,13 +11,14 @@ import NavigationBar from "./NavigationBar";
 
 class PortvisApp extends Component {
   render() {
+    // TODO: 404 page
     return (
       <>
         <Router>
           <NavigationBar />
           <div className="container-fluid flex-grow-1">
             <Switch>
-              {/* paths DON'T have to be exact in this case */}
+              {/* some paths DON'T have to be exact in this case */}
               <Route path="/" exact component={StockComponent} />
               <Route path="/backtest" component={BacktestComponent} />
               <Route path="/portfolios" component={PortfolioComponent} />
