@@ -1,10 +1,65 @@
 import React, { Component } from "react";
-import { ListGroup, Row, Col, Button, Nav } from "react-bootstrap";
+import { ListGroup, Row, Col, Button, Nav, ButtonGroup } from "react-bootstrap";
 import AllocationTable from "./AllocationTable";
 import PortfolioService from "../service/PortfolioService";
-import { Route, Switch, Link } from "react-router-dom";
-import Test from "./Test";
+import { Route } from "react-router-dom";
 import _ from "lodash";
+
+/**
+ * Component wrapper that returns a refresh icon from Bootstrap's icon set.
+ */
+function RefreshIcon() {
+  return (
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 16 16"
+      class="bi bi-arrow-repeat"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M2.854 7.146a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L2.5
+        8.207l1.646 1.647a.5.5 0 0 0 .708-.708l-2-2zm13-1a.5.5 0 0 0-.708
+        0L13.5 7.793l-1.646-1.647a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708
+        0l2-2a.5.5 0 0 0 0-.708z"
+      />
+      <path
+        fill-rule="evenodd"
+        d="M8 3a4.995 4.995 0 0 0-4.192 2.273.5.5 0 0 1-.837-.546A6 6 0 0 1
+        14 8a.5.5 0 0 1-1.001 0 5 5 0 0 0-5-5zM2.5 7.5A.5.5 0 0 1 3 8a5 5 0 0
+        0 9.192 2.727.5.5 0 1 1 .837.546A6 6 0 0 1 2 8a.5.5 0 0 1 .501-.5z"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Component wrapper that returns a left arrow icon from Bootstrap's icon set.
+ */
+function LeftArrow() {
+  return (
+    <svg
+      width="2em"
+      height="2em"
+      viewBox="0 0 16 16"
+      class="bi bi-arrow-left-short"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M7.854 4.646a.5.5 0 0 1 0 .708L5.207 8l2.647 2.646a.5.5 0 0
+        1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 0 1 .708 0z"
+      />
+      <path
+        fill-rule="evenodd"
+        d="M4.5 8a.5.5 0 0 1 .5-.5h6.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"
+      />
+    </svg>
+  );
+}
 
 class PortfolioComponent extends Component {
   // FIXME: type coercion of allocation proportions!! "0.5" becomes 1...
@@ -135,37 +190,42 @@ class PortfolioComponent extends Component {
   }
 
   addPortfolioClicked() {
-    const newPortfolio = {name:"", initialValue:0, allocations:{}};
-    PortfolioService.addPortfolio(newPortfolio).then((response) => {
-      if (!_.has(newPortfolio, "id")) {
-        const currId = newPortfolio.id;
-        this.setState({ currentPortfolioId: currId });
-        this.props.history.push(`/portfolios/${currId}`);
-      } else {
+    const newPortfolio = { name: "", initialValue: 0, allocations: {} };
+    PortfolioService.addPortfolio(newPortfolio)
+      .then((response) => {
+        if (!_.has(newPortfolio, "id")) {
+          const currId = newPortfolio.id;
+          this.setState({ currentPortfolioId: currId });
+          this.props.history.push(`/portfolios/${currId}`);
+        } else {
           alert("Portfolio was not successfully created.");
-      }
-      this.refreshPortfolios();
-    })
-    .catch((error) => {
-      alert("An error occurred when trying to add a new portfolio.");
-      console.log(`error: ${JSON.stringify(error, null, 2)}`);
-    });
+        }
+        this.refreshPortfolios();
+      })
+      .catch((error) => {
+        alert("An error occurred when trying to add a new portfolio.");
+        console.log(`error: ${JSON.stringify(error, null, 2)}`);
+      });
   }
 
   render() {
-    const { match, location } = this.props;
-    // this.state.portfolios.forEach((portfolio, _) => {
-    //   console.log(portfolio);
-    // });
-
     return (
       <Row>
         <Col md={2} className="bg-secondary p-2 vh-100">
-          <Nav
-            as={ListGroup}
-            activeKey={location.pathname}
-            className="flex-column"
-          >
+          <Nav as={ListGroup} className="flex-column">
+            <ListGroup.Item disable="true" variant="secondary">
+              <ButtonGroup>
+                <Button className="btn-info" onClick={this.addPortfolioClicked}>
+                  Add new portfolio
+                </Button>
+                <Button
+                  className="btn-warning"
+                  onClick={this.refreshPortfolios}
+                >
+                  <RefreshIcon />
+                </Button>
+              </ButtonGroup>
+            </ListGroup.Item>
             {Array.from(this.state.portfolios.values()).map((portfolio) => (
               <Nav.Link
                 as={ListGroup.Item}
@@ -181,39 +241,6 @@ class PortfolioComponent extends Component {
                 {portfolio.name} ({portfolio.id})
               </Nav.Link>
             ))}
-            {/* <Nav.Link
-              as={ListGroup.Item}
-              variant="dark"
-              action
-              eventKey="/1"
-              onClick={() => {
-                this.setState({ currentPortfolioId: 1 });
-                this.props.history.push(`/portfolios/1`);
-              }}
-            >
-              Portfolio 1<Link to={`${match.url}/1`}>aa</Link>
-            </Nav.Link> */}
-
-            {/* <Nav.Link
-              as={ListGroup.Item}
-              variant="dark"
-              action
-              eventKey="/2"
-              onClick={() => {
-                this.setState({ currentPortfolioId: 2 });
-                this.props.history.push(`/portfolios/2`);
-              }}
-            >
-              Portfolio 2<Link to={`${match.url}/2`}>aa</Link>
-            </Nav.Link> */}
-            <Nav.Link as={ListGroup.Item} variant="dark" action>
-              Link
-            </Nav.Link>
-            <ListGroup.Item disable="true" variant="secondary">
-              <Button className="btn-info" onClick={this.addPortfolioClicked}>
-                Add new portfolio
-              </Button>
-            </ListGroup.Item>
           </Nav>
         </Col>
         <Col md={10} className="p-4">
@@ -249,15 +276,11 @@ class PortfolioComponent extends Component {
               </Button>
             </>
           ) : (
-            <h2>select a portfolio...</h2>
+            <h2>
+              <LeftArrow />
+              Select a portfolio
+            </h2>
           )}
-          {/* <Route
-            path={`${this.props.match.path}/:portfolioId`}
-            component={AllocationTable}
-          /> */}
-          <Button onClick={this.refreshPortfolios}>Refresh</Button>
-          <Button onClick={() => console.log(this.props)}>debug props</Button>
-          <Button onClick={() => console.log(this.state)}>debug state</Button>
         </Col>
       </Row>
     );
@@ -265,21 +288,3 @@ class PortfolioComponent extends Component {
 }
 
 export default PortfolioComponent;
-
-//<ListGroup>
-//<ListGroup.Item action variant="dark">
-//  <Link to="/portfolios/39">Portfolio 1</Link>
-//</ListGroup.Item>
-//<ListGroup.Item action variant="dark">
-//  Link 2
-//</ListGroup.Item>
-//<ListGroup.Item variant="dark">
-//  <Button>Add new portfolio</Button>
-//</ListGroup.Item>
-//</ListGroup>
-
-//<AllocationTable
-//currentPortfolio={this.getCurrentPortfolio(
-//Number(props.match.params.portfolioId)
-//)}
-//{...props}

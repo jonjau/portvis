@@ -74,7 +74,6 @@ class BacktestComponent extends Component {
           </ListGroup>
         </Col>
         <Col md={10} className="p-4">
-          <AllocationTable />
         </Col>
       </Row>
     );

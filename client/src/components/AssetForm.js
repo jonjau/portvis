@@ -21,9 +21,6 @@ function AssetForm(props) {
       symbol: "",
       proportion: "",
     },
-    // need to pass in current asset symbols in portfolio for validation
-    // this is probably not the best way to do it.
-    //validate: (values) => validate(values, props.assetSymbols),
     validationSchema: Yup.object({
       symbol: Yup.string()
         .required("Required")
