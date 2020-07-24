@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import StockService from "../service/StockService";
-import Dygraph from "dygraphs";
 
 class StockComponent extends Component {
   constructor(props) {
@@ -37,12 +36,12 @@ class StockComponent extends Component {
       this.getOHLCAverage(timeSeriesData[dateTime]),
     ]);
     //console.log(dataArray);
-    new Dygraph(
-      // this is legacy apparently
-      this.refs.chart,
-      dataArray,
-      {}
-    );
+    // new Dygraph(
+    //   // this is legacy apparently
+    //   this.refs.chart,
+    //   dataArray,
+    //   {}
+    // );
   }
 
   getOHLCAverage(prices) {

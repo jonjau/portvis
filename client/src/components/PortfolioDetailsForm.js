@@ -88,6 +88,7 @@ function PortfolioDetailsForm(props) {
                   value={formik.values.initialValue}
                   onChange={formik.handleChange}
                 />
+                  {/* type="number"? */}
               </InputGroup>
             </Col>
             {formik.touched.proportion && formik.errors.proportion ? (

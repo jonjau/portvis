@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { ListGroup, Row, Col, Button, Nav, ButtonGroup } from "react-bootstrap";
-import AllocationTable from "./AllocationTable";
+import PortfolioEditComponent from "./PortfolioEditComponent";
 import PortfolioService from "../service/PortfolioService";
 import { Route } from "react-router-dom";
 import _ from "lodash";
@@ -14,19 +14,19 @@ function RefreshIcon() {
       width="1em"
       height="1em"
       viewBox="0 0 16 16"
-      class="bi bi-arrow-repeat"
+      className="bi bi-arrow-repeat"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        fill-rule="evenodd"
+        fillRule="evenodd"
         d="M2.854 7.146a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L2.5
         8.207l1.646 1.647a.5.5 0 0 0 .708-.708l-2-2zm13-1a.5.5 0 0 0-.708
         0L13.5 7.793l-1.646-1.647a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708
         0l2-2a.5.5 0 0 0 0-.708z"
       />
       <path
-        fill-rule="evenodd"
+        fillRule="evenodd"
         d="M8 3a4.995 4.995 0 0 0-4.192 2.273.5.5 0 0 1-.837-.546A6 6 0 0 1
         14 8a.5.5 0 0 1-1.001 0 5 5 0 0 0-5-5zM2.5 7.5A.5.5 0 0 1 3 8a5 5 0 0
         0 9.192 2.727.5.5 0 1 1 .837.546A6 6 0 0 1 2 8a.5.5 0 0 1 .501-.5z"
@@ -44,17 +44,17 @@ function LeftArrow() {
       width="2em"
       height="2em"
       viewBox="0 0 16 16"
-      class="bi bi-arrow-left-short"
+      className="bi bi-arrow-left-short"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        fill-rule="evenodd"
+        fillRule="evenodd"
         d="M7.854 4.646a.5.5 0 0 1 0 .708L5.207 8l2.647 2.646a.5.5 0 0
         1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 0 1 .708 0z"
       />
       <path
-        fill-rule="evenodd"
+        fillRule="evenodd"
         d="M4.5 8a.5.5 0 0 1 .5-.5h6.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"
       />
     </svg>
@@ -249,7 +249,7 @@ class PortfolioComponent extends Component {
                 render={(props) => (
                   // instead of using higher order components, we can do this
                   // to pass some (not all!) props to a Component
-                  <AllocationTable
+                  <PortfolioEditComponent
                     portfolioDetailsSubmitted={this.portfolioDetailsSubmitted}
                     deleteAssetClicked={this.deleteAssetClicked}
                     addAssetClicked={this.addAssetClicked}

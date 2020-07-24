@@ -4,7 +4,7 @@ import { Table, Button, Row, Col } from "react-bootstrap";
 import AssetForm from "./AssetForm";
 import PortfolioDetailsForm from "./PortfolioDetailsForm";
 
-function AllocationTable(props) {
+function PortfolioEditComponent(props) {
   // this.props or props are undefined in contructor(props).
   // In render they aren't. Also, setting state in componentDidUpdate is a
   // bad idea. Google "react you probably don't need derived state".
@@ -74,4 +74,4 @@ function AllocationTable(props) {
   );
 }
 
-export default AllocationTable;
+export default PortfolioEditComponent;
