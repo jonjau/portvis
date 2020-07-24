@@ -64,14 +64,13 @@ function LeftArrow() {
 class PortfolioComponent extends Component {
   // FIXME: type coercion of allocation proportions!! "0.5" becomes 1...
   // FIXME: clean up types in general, a lot of numeric IDs are strings now
+  // FIXME: check if stocks exist! and that allocation is less than 100%?
   constructor(props) {
     super(props);
 
     this.state = {
       portfolios: new Map(),
       currentPortfolioId: this.props.match.params.portfolioId,
-      // unused:
-      isLoading: true,
     };
     //console.log(this.props);
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
@@ -110,7 +109,6 @@ class PortfolioComponent extends Component {
         // make a map so lookup by id is easier
         this.setState({
           portfolios: new Map(response.data.map((p) => [p.id, p])),
-          isLoading: false,
         });
       })
       .catch((error) =>
@@ -244,7 +242,7 @@ class PortfolioComponent extends Component {
           </Nav>
         </Col>
         <Col md={10} className="p-4">
-          {this.state.currentPortfolioId && !this.state.isLoading ? (
+          {this.state.currentPortfolioId ? (
             <>
               <Route
                 path={`${this.props.match.path}/:portfolioId`}
