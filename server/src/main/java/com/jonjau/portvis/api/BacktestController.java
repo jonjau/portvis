@@ -9,6 +9,10 @@ import com.jonjau.portvis.utils.DeserializerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,27 +32,34 @@ public class BacktestController {
     }
 
     @GetMapping(value = "/backtest", params = {"id", "start", "end"})
-    public Map<Date, List<Double>> getReturns(
+    public Map<LocalDate, List<Double>> getReturns(
             @RequestParam("id") List<Long> portfolioIds,
             @RequestParam("start") String startDateString,
             @RequestParam("end") String endDateString
     ) throws Exception {
 
         System.out.println(portfolioIds);
+        //Date startDate = DeserializerUtil.parseDate(startDateString);
+        LocalDate start = DeserializerUtil.parseDate(startDateString);
+        LocalDate end = DeserializerUtil.parseDate(endDateString);
+        System.out.println(start);
+        System.out.println(end);
+//        LocalDateTime ldt = DateUtil.asLocalDateTime(startDate);
+//        ZonedDateTime zdt = ldt.atZone(ZoneId.of("US/Eastern"));
+//        ZonedDateTime zdt2 = zdt.withZoneSameInstant(ZoneId.of("Australia/Melbourne"));
+//        System.out.println(ldt);
+//        System.out.println(zdt);
+//        System.out.println(zdt2);
 
         List<Portfolio> portfolios = portfolioIds.stream()
                 .map(portfolioRepository::findById)
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toList());
 
-        Date startDate = DeserializerUtil.parseDate(startDateString);
-        Date endDate = DeserializerUtil.parseDate(endDateString);
+        //Date endDate = DeserializerUtil.parseDate(endDateString);
 
-        System.out.println(startDate);
-        System.out.println(endDate);
-
-        Map<Date, List<Double>> returns = backtestService.returnsCompoundedDaily(
-                portfolios, startDate, endDate);
+        Map<LocalDate, List<Double>> returns = backtestService.returnsCompoundedDaily(
+                portfolios, start, end);
 
 //        Map<Date, List<Double>> returns = new TreeMap<>();
 //        returns.put(DeserializerUtil.parseDate("2020-07-12"), Arrays.asList(101.57485468921821, 101.57485468921821));

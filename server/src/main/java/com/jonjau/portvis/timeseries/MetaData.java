@@ -17,7 +17,7 @@ public class MetaData {
   private String symbol;
   @JsonProperty("Output Size")
   private String outputSize;
-  @JsonProperty("Time Zone")
+  @JsonProperty(TIMEZONE_KEY)
   private String timezone;
   @JsonProperty("Last Refreshed")
   private String lastRefreshed;
@@ -31,4 +31,7 @@ public class MetaData {
   private String toCurrency;
 
   public static final String META_DATA_RESPONSE_KEY = "Meta Data";
+
+  // TODO: delete this...
+  public static final String TIMEZONE_KEY = "Time Zone";
 }

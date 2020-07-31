@@ -3,8 +3,8 @@ package com.jonjau.portvis.data.models;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Data
 // defaults to the name of the class
@@ -21,5 +21,6 @@ public class Portfolio {
 
     @ElementCollection
     // change to Long maybe?
-    private Map<String, Double> allocations = new HashMap<>();
+    // TreeMap so contents are ordered and sorted
+    private Map<String, Double> allocations = new TreeMap<>();
 }

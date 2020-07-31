@@ -3,17 +3,13 @@ package com.jonjau.portvis.backtest;
 import com.jonjau.portvis.AlphaVantageClient;
 import com.jonjau.portvis.data.models.Portfolio;
 import com.jonjau.portvis.timeseries.TimeSeriesData;
-import com.jonjau.portvis.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.DateTimeException;
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class BacktestService {
@@ -33,46 +29,45 @@ public class BacktestService {
         this.client = client;
     }
 
-    public Map<Date, Double> returnsCompoundedDaily(Portfolio portfolio, Date start, Date end)
+    public Map<LocalDate, Double> returnsCompoundedDaily(Portfolio portfolio, LocalDate start, LocalDate end)
             throws IOException {
 
-        // Convert Date to LocalDateTime, newer Java 8 API.
-        // Maybe do away with Date entirely? That would require modifying DeserializerUtil.
-        LocalDateTime startDate = DateUtil.asLocalDateTime(start);
-        LocalDateTime endDate = DateUtil.asLocalDateTime(end);
+        // validate date, validate allocation proportions: must add up to one
+
+        LocalDate startDate = start;
+        LocalDate endDate = end;
 
         double portfolioValue = portfolio.getInitialValue();
         Map<String, Double> allocations = portfolio.getAllocations();
 
-        Map<String, Map<Date, TimeSeriesData>> assetPrices = new HashMap<>();
+        Map<String, Map<LocalDate, TimeSeriesData>> assetPrices = new HashMap<>();
         for (String symbol : allocations.keySet()) {
-            Map<Date, TimeSeriesData> data = client.getTimeSeriesResult(symbol).getTimeSeries();
+            Map<LocalDate, TimeSeriesData> data = client.getTimeSeriesResult(symbol).getTimeSeries();
             assetPrices.put(symbol, data);
         }
 
         // dates with price data i.e. trading days
         // assumes all assets have been floated by the start date
-        Set<Date> validDates = assetPrices.entrySet().iterator().next().getValue().keySet();
+        Set<LocalDate> validDates = assetPrices.entrySet().iterator().next().getValue().keySet();
 
-        Map<Date, Double> portfolioValueOverTime = new TreeMap<>();
+        Map<LocalDate, Double> portfolioValueOverTime = new TreeMap<>();
 
         // TODO: assumes startDate is valid, if not then seek next!
-        if (!validDates.contains(DateUtil.asDate(startDate))) {
+        if (!validDates.contains(startDate)) {
             startDate = seekNextValidDate(startDate, validDates);
         }
-        portfolioValueOverTime.put(DateUtil.asDate(startDate), portfolioValue);
+        portfolioValueOverTime.put(startDate, portfolioValue);
         // also assuming endDate is valid, if not then seek previous...
-        if (!validDates.contains(DateUtil.asDate(endDate))) {
+        if (!validDates.contains(endDate)) {
             endDate = seekPreviousValidDate(endDate, validDates);
         }
 
-        LocalDateTime date = seekNextValidDate(startDate, validDates);
+        LocalDate date = seekNextValidDate(startDate, validDates);
         for (; date.isBefore(endDate) || date.isEqual(endDate);
              date = seekNextValidDate(date, validDates)) {
             // TODO: weekends?
             //Date prevDate = DateUtil.asDate(date.minusDays(1));
-            Date prevDate = DateUtil.asDate(seekPreviousValidDate(date, validDates));
-            Date currDate = DateUtil.asDate(date);
+            LocalDate prevDate = seekPreviousValidDate(date, validDates);
             double prevValue = portfolioValueOverTime.get(prevDate);
             double currValue = 0;
             for (Map.Entry<String, Double> allocation : allocations.entrySet()) {
@@ -83,14 +78,14 @@ public class BacktestService {
                 }
                 String symbol = allocation.getKey();
                 double pricePrev = getOHLCAverage(assetPrices.get(symbol).get(prevDate));
-                double priceCurr = getOHLCAverage(assetPrices.get(symbol).get(currDate));
+                double priceCurr = getOHLCAverage(assetPrices.get(symbol).get(date));
 
                 double rateOfReturn = (priceCurr / pricePrev) - 1;
 
                 currValue += allocationValue * (1 + rateOfReturn);
             }
             // again, LocalDateTime or date?
-            portfolioValueOverTime.put(currDate, currValue);
+            portfolioValueOverTime.put(date, currValue);
         }
         return portfolioValueOverTime;
     }
@@ -112,11 +107,13 @@ public class BacktestService {
         return stats.getAverage();
     }
 
-    public Map<Date, List<Double>> returnsCompoundedDaily(List<Portfolio> portfolios, Date start, Date end) throws IOException {
+    public Map<LocalDate, List<Double>> returnsCompoundedDaily(
+            List<Portfolio> portfolios, LocalDate start, LocalDate end
+    ) throws IOException {
 
-        List<Map<Date, Double>> list = new ArrayList<>();
+        List<Map<LocalDate, Double>> list = new ArrayList<>();
         for (Portfolio portfolio : portfolios) {
-            Map<Date, Double> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end);
+            Map<LocalDate, Double> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end);
             list.add(dateDoubleMap);
         }
         System.out.println(list);
@@ -124,7 +121,7 @@ public class BacktestService {
         //Map<Date, Double>[] returns = (DateDoubleMap[]) list.toArray();
         // reflection! Apparently this is the modern way to convert a List into an array
         //Portfolio[] args = portfolios.toArray(new Portfolio[0]);
-        Map<Date, List<Double>> resultMap = list.stream()
+        Map<LocalDate, List<Double>> resultMap = list.stream()
                 .flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -142,14 +139,14 @@ public class BacktestService {
         return resultMap;
     }
 
-    public LocalDateTime seekNextValidDate(
-            LocalDateTime dateTime, Set<Date> validDates
+    public LocalDate seekNextValidDate(
+            LocalDate dateTime, Set<LocalDate> validDates
     ) {
         int daysToSkip = 7;
 
-        if (dateTime.isBefore(LocalDateTime.now())) {
+        if (dateTime.isBefore(LocalDate.now())) {
             for (int i = 1; i <= daysToSkip; i++) {
-                if (validDates.contains(DateUtil.asDate(dateTime.plusDays(i)))) {
+                if (validDates.contains(dateTime.plusDays(i))) {
                     return dateTime.plusDays(i);
                 }
             }
@@ -158,19 +155,19 @@ public class BacktestService {
                 " found after " + dateTime.toString());
     }
 
-    public boolean isWeekend(LocalDateTime datetime) {
+    public boolean isWeekend(LocalDate datetime) {
         DayOfWeek dow = datetime.getDayOfWeek();
         return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
     }
 
-    public LocalDateTime seekPreviousValidDate(
-            LocalDateTime dateTime, Set<Date> validDates
+    public LocalDate seekPreviousValidDate(
+            LocalDate dateTime, Set<LocalDate> validDates
     ) {
         int daysToSkip = 7;
 
-        if (dateTime.isBefore(LocalDateTime.now())) {
+        if (dateTime.isBefore(LocalDate.now())) {
             for (int i = 1; i <= daysToSkip; i++) {
-                if (validDates.contains(DateUtil.asDate(dateTime.minusDays(i)))) {
+                if (validDates.contains(dateTime.minusDays(i))) {
                     return dateTime.minusDays(i);
                 }
             }

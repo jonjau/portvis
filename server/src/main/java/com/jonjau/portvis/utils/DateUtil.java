@@ -24,7 +24,7 @@ public class DateUtil {
         return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static Date parseDate(String dateString) throws ParseException {
-        return DeserializerUtil.parseDate(dateString);
-    }
+//    public static Date parseDate(String dateString) throws ParseException {
+//        return DeserializerUtil.parseDate(dateString);
+//    }
 }

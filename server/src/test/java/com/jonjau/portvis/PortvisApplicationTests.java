@@ -3,6 +3,7 @@ package com.jonjau.portvis;
 import com.jonjau.portvis.backtest.BacktestService;
 import com.jonjau.portvis.data.models.Portfolio;
 import com.jonjau.portvis.utils.DateUtil;
+import com.jonjau.portvis.utils.DeserializerUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +14,9 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -156,32 +159,32 @@ class PortvisApplicationTests {
         Portfolio portfolio2 = createAPortfolio();
         Long id2 = portfolio2.getId();
 
-
         // Sunday 12 June to Tuesday 14 June
         String startDateString = "2020-07-12";
         String endDateString = "2020-07-15";
         String uri = getRootUrl() + "/backtest/";
 
-        LocalDateTime start = LocalDateTime.of(2020,7,12,0,0,0);
-        LocalDateTime end = LocalDateTime.of(2020,7,14,0,0,0);
+        LocalDate startDate = DeserializerUtil.parseDate(startDateString);
+        LocalDate endDate = DeserializerUtil.parseDate(endDateString);
 
-        portfolio1 = restTemplate.getForObject(getRootUrl() + "/portfolios/50", Portfolio.class);
+        System.out.println(startDate);
+        System.out.println(endDate);
+        //portfolio1 = restTemplate.getForObject(getRootUrl() + "/portfolios/50", Portfolio.class);
 
-        Map<Date, Double> returns;
-        try {
-            returns = backtestService.returnsCompoundedDaily(
-                    portfolio1, DateUtil.parseDate(startDateString),
-                    DateUtil.parseDate(endDateString));
-        } catch (final ParseException | IOException e) {
-            System.out.println("Date/IO parsing error. Fix your test.");
-            return;
-        }
-
-        System.out.println(returns);
-
-        // This is how you get a class reference to a parameterized type...
-        @SuppressWarnings("unchecked")
-        Class<Map<Date, Double>> classRef = (Class<Map<Date, Double>>) (Class<?>) Map.class;
+//        Map<ZonedDateTime, Double> returns;
+//        try {
+//            returns = backtestService.returnsCompoundedDaily(
+//                    portfolio1, startDate, endDate);
+//        } catch (final IOException e) {
+//            System.out.println("Date/IO parsing error. Fix your test.");
+//            return;
+//        }
+//
+//        System.out.println(returns);
+//
+//        // This is how you get a class reference to a parameterized type...
+//        @SuppressWarnings("unchecked")
+//        Class<Map<Date, Double>> classRef = (Class<Map<Date, Double>>) (Class<?>) Map.class;
 
         //Map<Date, Double> aaa = restTemplate.getForObject(uri, classRef);
         //System.out.println(aaa.toString());
@@ -217,12 +220,12 @@ class PortvisApplicationTests {
 //        }
 
         @SuppressWarnings("unchecked")
-        Class<Map<Date, List<Double>>> classRef = (Class<Map<Date, List<Double>>>) (Class<?>) Map.class;
+        Class<Map<LocalDate, List<Double>>> classRef = (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
 
-        ResponseEntity<Map<Date, List<Double>>> getResponse = restTemplate.getForEntity(
+        ResponseEntity<Map<LocalDate, List<Double>>> getResponse = restTemplate.getForEntity(
                 uri, classRef);
 
-        Map<Date, List<Double>> returns = getResponse.getBody();
+        Map<LocalDate, List<Double>> returns = getResponse.getBody();
 
 
 
