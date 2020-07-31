@@ -83,6 +83,7 @@ class PortfolioComponent extends Component {
     this.savePortfolioClicked = this.savePortfolioClicked.bind(this);
     this.deletePortfolioClicked = this.deletePortfolioClicked.bind(this);
     this.addPortfolioClicked = this.addPortfolioClicked.bind(this);
+    this.deleteAllPortfoliosClicked = this.deleteAllPortfoliosClicked.bind(this);
   }
 
   componentDidMount() {
@@ -191,12 +192,16 @@ class PortfolioComponent extends Component {
     const newPortfolio = { name: "", initialValue: 0, allocations: {} };
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
-        if (!_.has(newPortfolio, "id")) {
+        // what is this condition for??
+        if (_.has(response.data, "id")) {
+          // the following lines are likely wrong...
           const currId = newPortfolio.id;
+          console.log(this.state);
           this.setState({ currentPortfolioId: currId });
           this.props.history.push(`/portfolios/${currId}`);
         } else {
-          alert("Portfolio was not successfully created.");
+          // necessary?
+          alert("Portfolio was not successfully deleted.");
         }
         this.refreshPortfolios();
       })
@@ -206,10 +211,27 @@ class PortfolioComponent extends Component {
       });
   }
 
+  deleteAllPortfoliosClicked() {
+    PortfolioService.deleteAllPortfolios()
+      .then((response) => {
+        if (response.data.deleted === true) {
+          this.setState({ currentPortfolioId: null });
+          this.props.history.push(`/portfolios/`);
+        } else {
+          alert("Portfolios were not successfully deleted.");
+        }
+        this.refreshPortfolios();
+      })
+      .catch((error) => {
+        alert("An error occurred when trying to delete all portfolios.");
+        console.log(`error: ${JSON.stringify(error, null, 2)}`);
+      });
+  }
+
   render() {
     return (
       <Row>
-        <Col md={2} className="bg-secondary p-2 vh-100">
+        <Col md={2} className="bg-secondary p-2 min-vh-100">
           <Nav as={ListGroup} className="flex-column">
             <ListGroup.Item disable="true" variant="secondary">
               <ButtonGroup>
@@ -239,6 +261,11 @@ class PortfolioComponent extends Component {
                 {portfolio.name} ({portfolio.id})
               </Nav.Link>
             ))}
+            <ListGroup.Item disable="true" variant="secondary">
+                <Button className="btn-danger" onClick={this.deleteAllPortfoliosClicked}>
+                  Delete all portfolios
+                </Button>
+            </ListGroup.Item>
           </Nav>
         </Col>
         <Col md={10} className="p-4">
