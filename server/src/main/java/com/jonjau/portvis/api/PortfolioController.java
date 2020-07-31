@@ -24,7 +24,8 @@ public class PortfolioController {
         this.portfolioRepository = portfolioRepository;
     }
 
-    @GetMapping("/portfolios")
+    // trailing slash /: stay consistent
+    @GetMapping("/portfolios/")
     public List<Portfolio> getAllPortfolios() {
         return portfolioRepository.findAll();
     }
@@ -38,7 +39,7 @@ public class PortfolioController {
         return ResponseEntity.ok().body(portfolio);
     }
 
-    @PostMapping("/portfolios")
+    @PostMapping("/portfolios/")
     public Portfolio createPortfolio(@Valid @RequestBody Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
     }
