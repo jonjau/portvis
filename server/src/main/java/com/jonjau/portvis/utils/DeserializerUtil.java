@@ -67,7 +67,7 @@ public final class DeserializerUtil {
         return dateObjectMap;
     }
 
-    private static Date parseDate(String dateString)
+    public static Date parseDate(String dateString)
             throws ParseException {
         // expect either date string or date-time string
         Date date = DATE_PARSER.parse(dateString);

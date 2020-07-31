@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// RestController includes many other annotations, such as @ResponseBody for each of its methods
+// TODO: don't forget to deal with this:
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class PortfolioController {
 
@@ -21,51 +24,65 @@ public class PortfolioController {
         this.portfolioRepository = portfolioRepository;
     }
 
-    @GetMapping("/portfolio")
-    public List<Portfolio> getPortfolio() {
+    @GetMapping("/portfolios")
+    public List<Portfolio> getAllPortfolios() {
         return portfolioRepository.findAll();
     }
 
-    @GetMapping("/portfolio/{id}")
+    @GetMapping("/portfolios/{id}")
     public ResponseEntity<Portfolio> getPortfolioById(
             @PathVariable(value = "id") Long portfolioId) throws Exception {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new Exception(
-                        "Portfolio with ID "+ portfolioId + " not found."));
+                        "Portfolio with ID " + portfolioId + " not found."));
         return ResponseEntity.ok().body(portfolio);
     }
 
-    @PostMapping("/portfolio")
+    @PostMapping("/portfolios")
     public Portfolio createPortfolio(@Valid @RequestBody Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
     }
 
-    @PutMapping("/portfolio/{id}")
+    @PutMapping("/portfolios/{id}")
     public ResponseEntity<Portfolio> updatePortfolio(
             @PathVariable(value = "id") Long portfolioId,
-            @Valid @RequestBody Portfolio portfolioDetails) throws Exception {
+            @Valid @RequestBody Portfolio portfolioDetails
+    ) throws Exception {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new Exception(
-                        "Portfolio with ID "+ portfolioId + " not found."));
+                        "Portfolio with ID " + portfolioId + " not found."));
 
+        portfolio.setName(portfolioDetails.getName());
+        portfolio.setInitialValue(portfolioDetails.getInitialValue());
         portfolio.setAllocations(portfolioDetails.getAllocations());
-        portfolio.setInitialValue(portfolio.getInitialValue());
 
         final Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
 
         return ResponseEntity.ok(updatedPortfolio);
     }
 
-    @DeleteMapping("/portfolio/{id}")
+    @DeleteMapping("/portfolios/{id}")
     public Map<String, Boolean> deletePortfolio(
-            @PathVariable(value="id") Long portfolioId) throws Exception {
+            @PathVariable(value = "id") Long portfolioId
+    ) throws Exception {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new Exception(
-                        "Portfolio with ID "+ portfolioId + " not found."));
+                        "Portfolio with ID " + portfolioId + " not found."));
 
         portfolioRepository.delete(portfolio);
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
+
+        return response;
+    }
+
+    @DeleteMapping("/portfolios/")
+    public Map<String, Boolean> deleteAllPortfolios() {
+        portfolioRepository.deleteAll();
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+
         return response;
     }
 }

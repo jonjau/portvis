@@ -1,5 +1,6 @@
 package com.jonjau.portvis.utils;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,5 +22,9 @@ public class DateUtil {
 
     public static LocalDateTime asLocalDateTime(Date date) {
         return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    public static Date parseDate(String dateString) throws ParseException {
+        return DeserializerUtil.parseDate(dateString);
     }
 }
