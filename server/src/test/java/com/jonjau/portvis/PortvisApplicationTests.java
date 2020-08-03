@@ -1,42 +1,38 @@
 package com.jonjau.portvis;
 
-import com.jonjau.portvis.backtest.BacktestService;
 import com.jonjau.portvis.data.models.Portfolio;
-import com.jonjau.portvis.utils.DateUtil;
-import com.jonjau.portvis.utils.DeserializerUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.net.URI;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Period;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = PortvisApplication.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PortvisApplicationTests {
 
+    // template for use in forming REST API requests
     private final TestRestTemplate restTemplate;
-    private final BacktestService backtestService;
 
     @Autowired
-    public PortvisApplicationTests(TestRestTemplate restTemplate, BacktestService backtestService) {
+    public PortvisApplicationTests(TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.backtestService = backtestService;
     }
 
     @LocalServerPort
     private int port;
+
+    private String getPort() { return Integer.toString(port); }
 
     private String getRootUrl() {
         return "http://localhost:" + port;
@@ -44,191 +40,180 @@ class PortvisApplicationTests {
 
     @Test
     void contextLoads() {
+        // "does the application context load without errors?"
     }
 
-    private Portfolio createAPortfolio() {
-        // create and insert a new portfolio
+    private Portfolio createPortfolio() {
+        // create and populate a new portfolio
         Portfolio portfolio = new Portfolio();
 
-        // create random allocations, and random values
+        portfolio.setName("test1");
+
+        double initialValue = 100.0;
+        portfolio.setInitialValue(initialValue);
+
         Map<String, Double> allocations = new HashMap<>();
         allocations.put("MSFT", 0.5);
         allocations.put("AAPL", 0.5);
         portfolio.setAllocations(allocations);
 
-        portfolio.setInitialValue(100);
-        portfolio.setName("test1");
+        // TODO: can this be refactored? It's repeated in every test
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/portfolios/").build().toUri();
 
+        // POST the portfolio
         ResponseEntity<Portfolio> postResponse = restTemplate.postForEntity(
-                getRootUrl() + "/portfolios", portfolio, Portfolio.class);
+                uri, portfolio, Portfolio.class);
 
+        // check that portfolio has been created successfully
         assertNotNull(postResponse);
         assertNotNull(postResponse.getBody());
+        assertEquals(postResponse.getBody().getInitialValue(), initialValue);
 
         return postResponse.getBody();
     }
 
+    private void deletePortfolioById(Long id) {
+        // DELETE the portfolio
+        restTemplate.delete(getRootUrl() + "/portfolios/" + id);
+    }
+
     @Test
     public void testGetAllPortfolios() {
+        // slightly more low level approach: using .exchange(), instead of directly getting objects
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/portfolio",
-                HttpMethod.GET, entity, String.class);
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/portfolios/").build().toUri();
 
+        ResponseEntity<String> response = restTemplate.exchange(uri,
+                HttpMethod.GET, entity, String.class);
         assertNotNull(response.getBody());
     }
 
     @Test
-    public void testGetPortfolioById() {
-        Portfolio portfolio = restTemplate.getForObject(
-                getRootUrl() + "/portfolio/1", Portfolio.class);
+    public void testCreateDeletePortfolio() {
+        // POST then DELETE, does not test GET
+        Long id = createPortfolio().getId();
+        deletePortfolioById(id);
+    }
 
-        System.out.println(portfolio.getName());
+    @Test
+    public void testCreateGetDeletePortfolio() {
+        // POST, GET, then DELETE
+        Long id = createPortfolio().getId();
+
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/portfolios/" + id).build().toUri();
+
+        Portfolio portfolio = restTemplate.getForObject(uri, Portfolio.class);
         assertNotNull(portfolio);
+
+        deletePortfolioById(id);
     }
 
     @Test
-    public void testCreatePortfolio() {
-        Portfolio portfolio = new Portfolio();
+    public void testUpdatePortfolio() {
+        // Create (POST) a portfolio
+        Long id = createPortfolio().getId();
 
-        // create random allocations, and random values
-        Map<String, Double> allocations = new HashMap<>();
-        allocations.put("MSFT", 0.50);
-        allocations.put("AAPL", 0.50);
-        portfolio.setAllocations(allocations);
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/portfolios/" + id).build().toUri();
 
-        portfolio.setInitialValue(1234.567);
-        portfolio.setName("pf1");
+        // GET the newly created portfolio
+        Portfolio portfolio = restTemplate.getForObject(uri, Portfolio.class);
 
-        ResponseEntity<Portfolio> postResponse = restTemplate.postForEntity(
-                getRootUrl() + "/portfolio", portfolio, Portfolio.class);
+        // update some of that portfolio's fields
+        String name = "pf2";
+        double initialValue = 123.4;
+        portfolio.setName(name);
+        portfolio.setInitialValue(initialValue);
 
-        assertNotNull(postResponse);
-        assertNotNull(postResponse.getBody());
-    }
+        // PUT the updated portfolio
+        restTemplate.put(uri, portfolio);
 
-    @Test
-    public void testUpdatePost() {
+        // GET the updated portfolio, then check if it has been updated correctly
+        Portfolio updatedPortfolio = restTemplate.getForObject(uri, Portfolio.class);
 
-        Long id = createAPortfolio().getId();
-
-        // get a portfolio
-        Portfolio portfolio = restTemplate.getForObject(
-                getRootUrl() + "/portfolio/" + id, Portfolio.class);
-
-        // update name field
-        portfolio.setName("pf2");
-        portfolio.setInitialValue(123.4);
-        restTemplate.put(getRootUrl() + "/portfolio/" + id, portfolio);
-
-
-
-        Portfolio updatedPortfolio = restTemplate.getForObject(
-                getRootUrl() + "/portfolio/" + id, Portfolio.class);
-
-        assertEquals(updatedPortfolio.getInitialValue(), 123.4);
         assertNotNull(updatedPortfolio);
-    }
+        assertEquals(updatedPortfolio.getName(), name);
+        assertEquals(updatedPortfolio.getInitialValue(), initialValue);
 
-    @Test
-    public void testDeletePost() {
-        int id = 2;
-        // get a portfolio
-        Portfolio portfolio = restTemplate.getForObject(
-                getRootUrl() + "/portfolio/" + id, Portfolio.class);
-        assertNotNull(portfolio);
-
-        // delete the portfolio
-        restTemplate.delete(getRootUrl() + "/portfolio/" + id);
-
-        try {
-            portfolio = restTemplate.getForObject(
-                    getRootUrl() + "/portfolio/" + id, Portfolio.class);
-        } catch (final HttpClientErrorException e) {
-            assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
-        }
+        // DELETE the portfolio to clean up
+        deletePortfolioById(id);
     }
 
     @Test
     public void testBacktestSinglePortfolio() {
+        // create a portfolio
+        Long id = createPortfolio().getId();
 
-        Portfolio portfolio1 = createAPortfolio();
-        Long id1 = portfolio1.getId();
+        // Sunday 12 June to Wednesday 15 June, 3 trading days
+        LocalDate startDate = LocalDate.of(2020, 7, 12);
+        LocalDate endDate = LocalDate.of(2020, 7, 15);
+        int daysBetween = Period.between(startDate, endDate).getDays();
 
-        Portfolio portfolio2 = createAPortfolio();
-        Long id2 = portfolio2.getId();
+        // build a URI (or URL?) from the params, this takes care of any escaping,
+        // also, the LocalDate's default toString() returns ISO-compliant yyyy-MM-dd strings.
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/backtest/")
+                .queryParam("start",startDate)
+                .queryParam("end", endDate)
+                .queryParam("id", id).build().toUri();
 
-        // Sunday 12 June to Tuesday 14 June
-        String startDateString = "2020-07-12";
-        String endDateString = "2020-07-15";
-        String uri = getRootUrl() + "/backtest/";
+        // this is one way to get a class reference to a parameterized type...
+        @SuppressWarnings("unchecked")
+        Class<Map<LocalDate, List<Double>>> classRef =
+                (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
 
-        LocalDate startDate = DeserializerUtil.parseDate(startDateString);
-        LocalDate endDate = DeserializerUtil.parseDate(endDateString);
+        // query (GET) the backtest service for the portfolio performance
+        ResponseEntity<Map<LocalDate, List<Double>>> getResponse =
+                restTemplate.getForEntity(uri, classRef);
+        Map<LocalDate, List<Double>> returns = getResponse.getBody();
 
-        System.out.println(startDate);
-        System.out.println(endDate);
-        //portfolio1 = restTemplate.getForObject(getRootUrl() + "/portfolios/50", Portfolio.class);
+        // check that the returned returns are present and correct, then delete to clean up
+        assertNotNull(returns);
+        assertEquals(returns.size(), daysBetween);
 
-//        Map<ZonedDateTime, Double> returns;
-//        try {
-//            returns = backtestService.returnsCompoundedDaily(
-//                    portfolio1, startDate, endDate);
-//        } catch (final IOException e) {
-//            System.out.println("Date/IO parsing error. Fix your test.");
-//            return;
-//        }
-//
-//        System.out.println(returns);
-//
-//        // This is how you get a class reference to a parameterized type...
-//        @SuppressWarnings("unchecked")
-//        Class<Map<Date, Double>> classRef = (Class<Map<Date, Double>>) (Class<?>) Map.class;
-
-        //Map<Date, Double> aaa = restTemplate.getForObject(uri, classRef);
-        //System.out.println(aaa.toString());
+        deletePortfolioById(id);
     }
 
     @Test
     public void testBacktestMultiplePortfolios() {
-        Portfolio portfolio1 = createAPortfolio();
+        // create two portfolios
+        Portfolio portfolio1 = createPortfolio();
         Long id1 = portfolio1.getId();
 
-        Portfolio portfolio2 = createAPortfolio();
+        Portfolio portfolio2 = createPortfolio();
         Long id2 = portfolio2.getId();
 
-        List<Portfolio> portfolios = new ArrayList<>();
-        portfolios.add(portfolio1);
-        portfolios.add(portfolio2);
+        // Sunday 12 June to Wednesday 15 June, 3 trading days
+        LocalDate startDate = LocalDate.of(2020, 7, 12);
+        LocalDate endDate = LocalDate.of(2020, 7, 15);
+        int daysBetween = Period.between(startDate, endDate).getDays();
 
-        // Sunday 12 June to Tuesday 14 June
-        String startDateString = "2020-07-10";
-        String endDateString = "2020-07-20";
-        String uri = getRootUrl() + "/backtest?" + "id=" + id1 + "&id=" + id2
-                + "&start=" + startDateString + "&end=" + endDateString;
-        uri = getRootUrl() + "/backtest?id=49&id=50&start=2020-07-10&end=2020-07-20";
-
-//        Map<Date, List<Double>> returns;
-//        try {
-//            returns = backtestService.returnsCompoundedDaily(
-//                    portfolios, DateUtil.parseDate(startDateString),
-//                    DateUtil.parseDate(endDateString));
-//        } catch (final ParseException | IOException e) {
-//            System.out.println("Date/IO parsing error. Fix your test.");
-//            return;
-//        }
+        // build the URI, then query with GET
+        URI uri = UriComponentsBuilder.newInstance().scheme("http")
+                .host("localhost").port(getPort()).path("/backtest/")
+                .queryParam("start",startDate)
+                .queryParam("end", endDate)
+                .queryParam("id", id1)
+                .queryParam("id", id2).build().toUri();
 
         @SuppressWarnings("unchecked")
-        Class<Map<LocalDate, List<Double>>> classRef = (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
+        Class<Map<LocalDate, List<Double>>> classRef =
+                (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
 
-        ResponseEntity<Map<LocalDate, List<Double>>> getResponse = restTemplate.getForEntity(
-                uri, classRef);
-
+        ResponseEntity<Map<LocalDate, List<Double>>> getResponse =
+                restTemplate.getForEntity(uri, classRef);
         Map<LocalDate, List<Double>> returns = getResponse.getBody();
 
+        // add checking for accurate prices maybe?
+        assertNotNull(returns);
+        assertEquals(returns.size(), daysBetween);
 
-
-        //System.out.println(returns);
+        deletePortfolioById(id1);
+        deletePortfolioById(id2);
     }
 }

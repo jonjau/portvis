@@ -80,8 +80,8 @@ public final class DeserializerUtil {
     public static LocalDate parseDate(String dateString)
             throws DateTimeParseException {
 
-        // this parses '2011-12-03+01:00' or '2011-12-03'
-        return LocalDate.parse(dateString, DateTimeFormatter.ISO_DATE);
+        // this parses '2011-12-03'
+        return LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
 
         // interpret this as time in the given zone string e.g. US/Eastern
         //return ldt.atZone(ZoneId.of(zone));
