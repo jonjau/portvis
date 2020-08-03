@@ -16,8 +16,8 @@ class BacktestService{
       end: endDate,
       id: portfolioIds,
     });
-    //console.log(params.toString());
     const url = `http://127.0.0.1:8080/backtest?${params.toString()}`;
+    console.log(url);
     return axios.get(url);
   }
 }

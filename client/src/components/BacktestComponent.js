@@ -42,6 +42,14 @@ function getDatesBetween(startDate, endDate) {
   return dates;
 }
 
+function getISODateOnly(date) {
+  console.log(date.getMonth());
+  // month is 0-11 while date is 1-31...
+  return `${date.getFullYear().toString().padStart(4, "0")}` +
+         `-${(date.getMonth()+1).toString().padStart(2, "0")}` +
+         `-${date.getDate().toString().padStart(2, "0")}`;
+}
+
 function newDate(days) {
   return moment().add(days, "d").toDate();
 }
@@ -165,8 +173,8 @@ class BacktestComponent extends Component {
 
   backtestPortfolios() {
     const portfolioIds = this.state.selectedPortfolioIds;
-    const startDate = "2020-07-12";
-    const endDate = "2020-07-15";
+    const startDate = getISODateOnly(this.state.startDate);
+    const endDate = getISODateOnly(this.state.endDate);
     //const dates = getDatesBetween(new Date(2020, 7, 12), new Date(2020, 7, 15));
     //console.log(dates);
     BacktestService.getReturns(portfolioIds, startDate, endDate)
