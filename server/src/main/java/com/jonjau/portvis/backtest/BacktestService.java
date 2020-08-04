@@ -116,7 +116,7 @@ public class BacktestService {
             Map<LocalDate, Double> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end);
             list.add(dateDoubleMap);
         }
-        System.out.println(list);
+        //System.out.println(list);
         //class DateDoubleMap extends HashMap<Date, Double> {}
         //Map<Date, Double>[] returns = (DateDoubleMap[]) list.toArray();
         // reflection! Apparently this is the modern way to convert a List into an array

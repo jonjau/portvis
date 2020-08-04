@@ -1,8 +1,7 @@
 package com.jonjau.portvis.timeseries;
 
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Map;
 
 import lombok.Data;

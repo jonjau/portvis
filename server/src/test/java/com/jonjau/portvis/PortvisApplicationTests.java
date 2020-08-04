@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class PortvisApplicationTests {
 
     // template for use in forming REST API requests
+    // TODO: convert to WebClient? future proof...
     private final TestRestTemplate restTemplate;
 
     @Autowired

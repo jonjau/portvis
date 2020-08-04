@@ -38,18 +38,10 @@ public class BacktestController {
             @RequestParam("end") String endDateString
     ) throws Exception {
 
-        System.out.println(portfolioIds);
+        //System.out.println(portfolioIds);
         //Date startDate = DeserializerUtil.parseDate(startDateString);
         LocalDate start = DeserializerUtil.parseDate(startDateString);
         LocalDate end = DeserializerUtil.parseDate(endDateString);
-        System.out.println(start);
-        System.out.println(end);
-//        LocalDateTime ldt = DateUtil.asLocalDateTime(startDate);
-//        ZonedDateTime zdt = ldt.atZone(ZoneId.of("US/Eastern"));
-//        ZonedDateTime zdt2 = zdt.withZoneSameInstant(ZoneId.of("Australia/Melbourne"));
-//        System.out.println(ldt);
-//        System.out.println(zdt);
-//        System.out.println(zdt2);
 
         List<Portfolio> portfolios = portfolioIds.stream()
                 .map(portfolioRepository::findById)

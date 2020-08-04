@@ -1,0 +1,45 @@
+<config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="http://www.ehcache.org/v3
+            http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
+    
+    <cache-template name="default">
+        <listeners>
+            <listener>
+                <!-- Add the logger class to listen to caching events -->
+                <class>com.jonjau.portvis.config.CacheLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+        
+        <resources>
+            <!--
+            Cache the 10 most recent entries in heap
+            Utilizing off-heap, and disk tiers requires making TimeSeriesResult (and everything
+            it contains) serializable (implement java.lang.Serializable), and I am not sure what
+            implications that has...
+            -->
+            <heap unit="entries">10</heap>
+            <!-- no persistent storage will be used, just in memory (RAM): heap, off-heap -->
+        </resources>
+    </cache-template>
+
+    <cache alias="timeSeriesResults" uses-template="default">
+        <key-type>java.lang.String</key-type>
+        <value-type>com.jonjau.portvis.timeseries.TimeSeriesResult</value-type>
+
+        <expiry>
+            <!--
+            time-to-live: cache mappings will expire 8 hours after creation
+            this is reasonable as we are dealing with daily time series data
+            -->
+            <ttl unit="hours">8</ttl>
+        </expiry>
+    </cache>
+
+</config>
