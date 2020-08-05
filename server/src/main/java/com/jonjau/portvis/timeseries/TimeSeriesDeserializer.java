@@ -25,7 +25,7 @@ public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
             timeSeriesResult.setTimeSeries(
                 DeserializerUtil.getDateObjectMap(node, TimeSeriesData.class)
             );
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             System.out.println("Error when deserializing:");
             System.out.println(node.toString());
             throwable.printStackTrace();

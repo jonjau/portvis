@@ -3,6 +3,12 @@ package com.jonjau.portvis.utils;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +17,8 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static com.jonjau.portvis.timeseries.MetaData.META_DATA_RESPONSE_KEY;
+import static com.jonjau.portvis.timeseries.MetaData.TIMEZONE_KEY;
+
 import com.jonjau.portvis.timeseries.MetaData;
 
 /**
@@ -20,7 +28,6 @@ import com.jonjau.portvis.timeseries.MetaData;
 public final class DeserializerUtil {
 
     /**
-     * 
      * @param jsonNode
      * @return TODO: JAVADOCS
      */
@@ -44,9 +51,12 @@ public final class DeserializerUtil {
         return JsonParser.toObject(JsonParser.toJson(sanitizedNodes), MetaData.class);
     }
 
-    public static <T> Map<Date, T> getDateObjectMap(JsonNode jsonNode, Class<T> resultObject) {
+    public static <T> Map<LocalDate, T> getDateObjectMap(JsonNode jsonNode, Class<T> resultObject) {
 
-        Map<Date, T> dateObjectMap = new TreeMap<>();
+        Map<LocalDate, T> dateObjectMap = new TreeMap<>();
+        // assume metadata always exists
+        //String timezone = jsonNode.get(META_DATA_RESPONSE_KEY).get(TIMEZONE_KEY).textValue();
+
         jsonNode.fields().forEachRemaining(nodeEntry -> {
             // ignore metadata, only want time series data
             if (nodeEntry.getKey().equals(META_DATA_RESPONSE_KEY)) {
@@ -56,10 +66,10 @@ public final class DeserializerUtil {
                 // dataNodes: high, low, open, volume, etc.
                 Map<String, Object> dataNodes = sanitizeNodeKeys(timeSeriesEntry.getValue());
                 try {
-                    Date date = parseDate(timeSeriesEntry.getKey());
+                    LocalDate date = parseDate(timeSeriesEntry.getKey());
                     T data = JsonParser.toObject(JsonParser.toJson(dataNodes), resultObject);
                     dateObjectMap.put(date, data);
-                } catch (IOException | ParseException e) {
+                } catch (IOException | DateTimeParseException e) {
                     e.printStackTrace();
                 }
             });
@@ -67,15 +77,25 @@ public final class DeserializerUtil {
         return dateObjectMap;
     }
 
-    private static Date parseDate(String dateString)
-            throws ParseException {
-        // expect either date string or date-time string
-        Date date = DATE_PARSER.parse(dateString);
-        if (dateString.length() > DATE_FORMAT.length()) {
-            date = DATE_TIME_PARSER.parse(dateString);
-        }
-        return date;
+    public static LocalDate parseDate(String dateString)
+            throws DateTimeParseException {
+
+        // this parses '2011-12-03'
+        return LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
+
+        // interpret this as time in the given zone string e.g. US/Eastern
+        //return ldt.atZone(ZoneId.of(zone));
     }
+
+//    public static Date parseDate(String dateString)
+//            throws ParseException {
+//        // expect either date string or date-time string
+//        Date date = DATE_PARSER.parse(dateString);
+//        if (dateString.length() > DATE_FORMAT.length()) {
+//            date = DATE_TIME_PARSER.parse(dateString);
+//        }
+//        return date;
+//    }
 
     private static final String REMOVE_NUMBER_REGEX = "\\d*.\\s(.*)";
 

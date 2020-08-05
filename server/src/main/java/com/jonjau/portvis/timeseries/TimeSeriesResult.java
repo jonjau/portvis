@@ -1,6 +1,7 @@
 package com.jonjau.portvis.timeseries;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Map;
 
 import lombok.Data;
@@ -12,5 +13,5 @@ import lombok.Data;
 public class TimeSeriesResult {
 
     private MetaData metaData;
-    private Map<Date, TimeSeriesData> timeSeries;
+    private Map<LocalDate, TimeSeriesData> timeSeries;
 }
