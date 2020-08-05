@@ -84,11 +84,14 @@ class BacktestComponent extends Component {
       stockHistory: [],
       portfolios: new Map(),
       selectedPortfolioIds: [],
-      startDate: moment().subtract(9, "days"),
+      startDate: moment().subtract(23, "days"),
       endDate: moment().subtract(2, "days"),
       chartData: [],
     };
     this.chartRef = React.createRef();
+    // FIXME: limit to 8. enforce this.
+    this.chartColors = ["SteelBlue", "Orange", "Teal", "FireBrick",
+                        "Olive", "Sienna", "Purple", "Gold"]
 
     this.refreshStock = this.refreshStock.bind(this);
 
@@ -103,7 +106,6 @@ class BacktestComponent extends Component {
   }
 
   componentDidMount() {
-    //this.refreshStock();
     this.refreshPortfolios();
     this.initChart();
   }
@@ -190,6 +192,8 @@ class BacktestComponent extends Component {
         lineTension: 0,
         label: priceData[i].portfolio.name,
         data: priceData[i].returns,
+        backgroundColor: this.chartColors[i],
+        borderColor: this.chartColors[i],
       };
       return dataset;
     });
@@ -214,7 +218,7 @@ class BacktestComponent extends Component {
         responsive: true,
         title: {
           display: true,
-          text: "testo testo",
+          text: "lorem ipsum",
         },
         tooltips: {
           position: "nearest",
@@ -356,7 +360,6 @@ class BacktestComponent extends Component {
           <div className="w-100">
             <canvas id="backtestChart" ref={this.chartRef}></canvas>
           </div>
-          <Button onClick={() => console.log(this.state)}>debug state</Button>
         </Col>
       </Row>
     );

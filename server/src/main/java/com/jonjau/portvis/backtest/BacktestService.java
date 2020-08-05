@@ -136,7 +136,8 @@ public class BacktestService {
                             return newList;
                         })
                 );
-        return resultMap;
+        Map<LocalDate, List<Double>> sortedMap = new TreeMap<>(resultMap);
+        return sortedMap;
     }
 
     public LocalDate seekNextValidDate(

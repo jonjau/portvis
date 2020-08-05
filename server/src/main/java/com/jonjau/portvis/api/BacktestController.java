@@ -60,9 +60,7 @@ public class BacktestController {
 //        returns.put(DeserializerUtil.parseDate("2020-07-13"), Arrays.asList(100.28538513902708, 100.28538513902708));
 //        returns.put(DeserializerUtil.parseDate("2020-07-11"), Arrays.asList(100.0, 100.0));
 
-        System.out.println("mario");
         System.out.println(returns);
-
         return returns;
     }
 
