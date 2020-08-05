@@ -42,14 +42,6 @@ function getDatesBetween(startDate, endDate) {
   return dates;
 }
 
-function getISODateOnly(date) {
-  console.log(date.getMonth());
-  // month is 0-11 while date is 1-31...
-  return `${date.getFullYear().toString().padStart(4, "0")}` +
-         `-${(date.getMonth()+1).toString().padStart(2, "0")}` +
-         `-${date.getDate().toString().padStart(2, "0")}`;
-}
-
 function newDate(days) {
   return moment().add(days, "d").toDate();
 }
@@ -92,13 +84,13 @@ class BacktestComponent extends Component {
       stockHistory: [],
       portfolios: new Map(),
       selectedPortfolioIds: [],
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: moment().subtract(9, "days"),
+      endDate: moment().subtract(2, "days"),
       chartData: [],
     };
+    this.chartRef = React.createRef();
 
     this.refreshStock = this.refreshStock.bind(this);
-    this.plotHistory = this.plotHistory.bind(this);
 
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
 
@@ -107,11 +99,13 @@ class BacktestComponent extends Component {
 
     this.backtestPortfolios = this.backtestPortfolios.bind(this);
     this.plotChart = this.plotChart.bind(this);
+    this.initChart = this.initChart.bind(this);
   }
 
   componentDidMount() {
     //this.refreshStock();
     this.refreshPortfolios();
+    this.initChart();
   }
 
   refreshPortfolios() {
@@ -141,22 +135,6 @@ class BacktestComponent extends Component {
       );
   }
 
-  plotHistory() {
-    const timeSeriesData = this.state.stockHistory.timeSeries;
-
-    const dataArray = Object.keys(timeSeriesData).map((dateTime) => [
-      new Date(dateTime),
-      this.getOHLCAverage(timeSeriesData[dateTime]),
-    ]);
-    //console.log(dataArray);
-    // new Dygraph(
-    //   // this is legacy apparently
-    //   this.refs.chart,
-    //   dataArray,
-    //   {}
-    // );
-  }
-
   selectPortfolio(id) {
     this.setState((prevState) => ({
       selectedPortfolioIds: [...prevState.selectedPortfolioIds, id],
@@ -173,15 +151,13 @@ class BacktestComponent extends Component {
 
   backtestPortfolios() {
     const portfolioIds = this.state.selectedPortfolioIds;
-    const startDate = getISODateOnly(this.state.startDate);
-    const endDate = getISODateOnly(this.state.endDate);
+    const startDate = this.state.startDate.format("YYYY-MM-DD");
+    const endDate = this.state.endDate.format("YYYY-MM-DD");
     //const dates = getDatesBetween(new Date(2020, 7, 12), new Date(2020, 7, 15));
     //console.log(dates);
     BacktestService.getReturns(portfolioIds, startDate, endDate)
       .then((response) => {
-        //TODO: delete this log
         this.setState({ chartData: response.data });
-        console.log(response.data);
         this.plotChart();
       })
       .catch((error) => {
@@ -192,47 +168,59 @@ class BacktestComponent extends Component {
   }
 
   plotChart() {
-    const dates = Object.keys(this.state.chartData)
-      .map((dateString) => new Date(dateString))
-      .sort((date1, date2) => date1 - date2);
-    // console.log(dates);
-    // const prices = Object.values(data).map((price) => price[0]);
+    const dates = Object.keys(this.state.chartData).map(
+      (dateString) => new Date(dateString)
+    );
+    //.sort((date1, date2) => date1 - date2);
 
+    // price data for each portfolio
     const priceData = this.state.selectedPortfolioIds.map((id, i) => {
-      const obj = {
-        portfolio: [this.state.portfolios.get(id)],
-        returns: Object.entries(this.state.chartData).map(
-          ([_, prices]) => prices[i]
-        ),
+      const priceDataForOnePortfolio = {
+        portfolio: this.state.portfolios.get(id),
+        returns: Object.values(this.state.chartData).map((prices) => prices[i]),
       };
-      //console.log(obj);
-      return obj;
+      return priceDataForOnePortfolio;
     });
 
-    //    const priceData = Object.entries(
-    //      this.state.chartData
-    //    ).map(([date, prices]) => );
-    console.log(priceData);
+    //console.log(priceData);
+
+    const datasets = this.state.selectedPortfolioIds.map((_, i) => {
+      const dataset = {
+        fill: false,
+        lineTension: 0,
+        label: priceData[i].portfolio.name,
+        data: priceData[i].returns,
+      };
+      return dataset;
+    });
+
     const data = {
       // Labels should be Date objects
       labels: dates,
-      datasets: [
-        {
-          fill: false,
-          label: "aaa",
-          data: priceData[0].returns,
-          borderColor: "teal",
-          backgroundColor: "teal",
-          lineTension: 0,
-        },
-      ],
+      datasets: [...datasets],
     };
+
+    this.chart.data.labels = dates;
+    this.chart.data.datasets = [...datasets];
+    this.chart.update();
+  }
+
+  initChart() {
     const options = {
       type: "line",
-      data: data,
+      data: {},
       options: {
         fill: false,
         responsive: true,
+        title: {
+          display: true,
+          text: "testo testo",
+        },
+        tooltips: {
+          position: "nearest",
+          mode: "index",
+          intersect: false,
+        },
         scales: {
           xAxes: [
             {
@@ -262,7 +250,8 @@ class BacktestComponent extends Component {
         },
       },
     };
-    new Chart("backtestChart", options);
+    // string or context (ref)?
+    this.chart = new Chart("backtestChart", options);
   }
 
   render() {
@@ -294,10 +283,12 @@ class BacktestComponent extends Component {
                   <DatePicker
                     className="col-12"
                     closeOnScroll={true}
-                    selected={this.state.startDate}
-                    onChange={(date) => this.setState({ startDate: date })}
+                    selected={this.state.startDate.toDate()}
+                    onChange={(date) =>
+                      this.setState({ startDate: moment(date) })
+                    }
                     //minDate={
-                    maxDate={this.state.endDate}
+                    maxDate={this.state.endDate.toDate()}
                     peekNextMonth
                     showMonthDropdown
                     showYearDropdown
@@ -311,10 +302,12 @@ class BacktestComponent extends Component {
                   <DatePicker
                     className="col-12"
                     closeOnScroll={true}
-                    selected={this.state.endDate}
-                    onChange={(date) => this.setState({ endDate: date })}
-                    minDate={this.state.startDate}
-                    maxDate={new Date()}
+                    selected={this.state.endDate.toDate()}
+                    onChange={(date) =>
+                      this.setState({ endDate: moment(date) })
+                    }
+                    minDate={this.state.startDate.toDate()}
+                    maxDate={moment().subtract(2, "days").toDate()}
                     peekNextMonth
                     showMonthDropdown
                     showYearDropdown
@@ -360,14 +353,10 @@ class BacktestComponent extends Component {
           </Table>
         </Col>
         <Col md="9">
-          <Row>
-            <Col md="6">
-              <canvas id="backtestChart" width="400" height="400"></canvas>
-              <Button onClick={() => console.log(this.state)}>
-                debug state
-              </Button>
-            </Col>
-          </Row>
+          <div className="w-100">
+            <canvas id="backtestChart" ref={this.chartRef}></canvas>
+          </div>
+          <Button onClick={() => console.log(this.state)}>debug state</Button>
         </Col>
       </Row>
     );
