@@ -1,5 +1,13 @@
 import React, { Component } from "react";
-import { ListGroup, Row, Col, Button, Nav, ButtonGroup } from "react-bootstrap";
+import {
+  ListGroup,
+  Row,
+  Col,
+  Button,
+  Nav,
+  ButtonGroup,
+  Alert,
+} from "react-bootstrap";
 import PortfolioEditComponent from "./PortfolioEditComponent";
 import PortfolioService from "../service/PortfolioService";
 import { Route } from "react-router-dom";
@@ -62,17 +70,16 @@ function LeftArrow() {
 }
 
 class PortfolioComponent extends Component {
-  // FIXME: type coercion of allocation proportions!! "0.5" becomes 1...
   // FIXME: clean up types in general, a lot of numeric IDs are strings now
-  // FIXME: check if stocks exist! and that allocation is less than 100%?
+  // FIXME: check if stocks exist!
   constructor(props) {
     super(props);
 
     this.state = {
       portfolios: new Map(),
       currentPortfolioId: this.props.match.params.portfolioId,
+      allocationError: false,
     };
-    //console.log(this.props);
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
     this.getCurrentPortfolio = this.getCurrentPortfolio.bind(this);
 
@@ -83,7 +90,11 @@ class PortfolioComponent extends Component {
     this.savePortfolioClicked = this.savePortfolioClicked.bind(this);
     this.deletePortfolioClicked = this.deletePortfolioClicked.bind(this);
     this.addPortfolioClicked = this.addPortfolioClicked.bind(this);
-    this.deleteAllPortfoliosClicked = this.deleteAllPortfoliosClicked.bind(this);
+    this.deleteAllPortfoliosClicked = this.deleteAllPortfoliosClicked.bind(
+      this
+    );
+
+    this.isPortfolioFullyAllocated = this.isPortfolioFullyAllocated.bind(this);
   }
 
   componentDidMount() {
@@ -155,6 +166,8 @@ class PortfolioComponent extends Component {
 
   savePortfolioClicked() {
     const currId = this.state.currentPortfolioId;
+    const currPortfolio = this.state.portfolios.get(currId);
+
     PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
       .then((response) => {
         if (!_.isEqual(response.data, this.state.portfolios.get(currId))) {
@@ -189,7 +202,11 @@ class PortfolioComponent extends Component {
   }
 
   addPortfolioClicked() {
-    const newPortfolio = { name: "", initialValue: 0, allocations: {} };
+    const newPortfolio = {
+      name: "",
+      initialValue: 100,
+      allocations: { MSFT: 1.0 },
+    };
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
         // what is this condition for??
@@ -201,7 +218,7 @@ class PortfolioComponent extends Component {
           this.props.history.push(`/portfolios/${currId}`);
         } else {
           // necessary?
-          alert("Portfolio was not successfully deleted.");
+          alert("Portfolio was not successfully added.");
         }
         this.refreshPortfolios();
       })
@@ -228,7 +245,14 @@ class PortfolioComponent extends Component {
       });
   }
 
+  isPortfolioFullyAllocated() {
+    const { portfolios, currentPortfolioId: currId } = this.state;
+    return _.sum(Object.values(portfolios.get(currId).allocations)) !== 1.0;
+  }
+
   render() {
+    const { portfolios, currentPortfolioId } = this.state;
+
     return (
       <Row>
         <Col md={2} className="bg-secondary p-2 min-vh-100">
@@ -246,7 +270,7 @@ class PortfolioComponent extends Component {
                 </Button>
               </ButtonGroup>
             </ListGroup.Item>
-            {Array.from(this.state.portfolios.values()).map((portfolio) => (
+            {Array.from(portfolios.values()).map((portfolio) => (
               <Nav.Link
                 as={ListGroup.Item}
                 variant="dark"
@@ -262,19 +286,23 @@ class PortfolioComponent extends Component {
               </Nav.Link>
             ))}
             <ListGroup.Item disable="true" variant="secondary">
-                <Button className="btn-danger" onClick={this.deleteAllPortfoliosClicked}>
-                  Delete all portfolios
-                </Button>
+              <Button
+                className="btn-danger"
+                onClick={this.deleteAllPortfoliosClicked}
+              >
+                Delete all portfolios
+              </Button>
             </ListGroup.Item>
           </Nav>
         </Col>
         <Col md={10} className="p-4">
-          {this.state.currentPortfolioId ? (
+          {currentPortfolioId ? (
             <>
               <Route
                 path={`${this.props.match.path}/:portfolioId`}
                 render={(props) => (
-                  // instead of using higher order components, we can do this
+                  // instead of using higher order components, we can do
+                  // {...props}
                   // to pass some (not all!) props to a Component
                   <PortfolioEditComponent
                     portfolioDetailsSubmitted={this.portfolioDetailsSubmitted}
@@ -287,18 +315,27 @@ class PortfolioComponent extends Component {
                   />
                 )}
               />
-              <Button
-                className="m-2 btn-success"
-                onClick={this.savePortfolioClicked}
-              >
-                Save changes to portfolio
-              </Button>
-              <Button
-                className="m-2 btn-danger"
-                onClick={this.deletePortfolioClicked}
-              >
-                Delete this portfolio
-              </Button>
+              <Row>
+                <Button
+                  className="m-2 btn-success"
+                  onClick={this.savePortfolioClicked}
+                  disabled={this.isPortfolioFullyAllocated()}
+                >
+                  Save changes to portfolio
+                </Button>
+                <Button
+                  className="m-2 btn-danger"
+                  onClick={this.deletePortfolioClicked}
+                >
+                  Delete this portfolio
+                </Button>
+                {this.isPortfolioFullyAllocated() ? (
+                  <Alert variant="warning" className="m-2">
+                    Total portfolio allocation must be exactly 100%. Add more
+                    assets to reach 100% total allocation before saving changes.
+                  </Alert>
+                ) : null}
+              </Row>
             </>
           ) : (
             <h2>

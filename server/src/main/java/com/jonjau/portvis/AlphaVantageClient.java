@@ -42,7 +42,7 @@ public class AlphaVantageClient {
             .host("www.alphavantage.co").path("/query")
             .queryParam("function", "TIME_SERIES_DAILY")
             .queryParam("symbol", queryParamString)
-            .queryParam("outputsize", "compact")
+            .queryParam("outputsize", "full")
             .queryParam("apikey", "D2D48LZKE59QAB83").build().toUri();
 
         // this is blocking code: slow

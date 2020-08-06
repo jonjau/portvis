@@ -4,6 +4,8 @@ import { Table, Button, Row, Col } from "react-bootstrap";
 import AssetForm from "./AssetForm";
 import PortfolioDetailsForm from "./PortfolioDetailsForm";
 
+import _ from "lodash";
+
 function PortfolioEditComponent(props) {
   // this.props or props are undefined in contructor(props).
   // In render they aren't. Also, setting state in componentDidUpdate is a
@@ -33,6 +35,7 @@ function PortfolioEditComponent(props) {
             submitAction={addAssetClicked}
             // turn {s1: p1, s2: p2} into [s1, s2]
             assetSymbols={Object.keys(currentPortfolio.allocations)}
+            totalAllocation={_.sum(Object.values(currentPortfolio.allocations))}
           />
         </Col>
       </Row>

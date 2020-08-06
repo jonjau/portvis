@@ -18,34 +18,6 @@ import Chart from "chart.js";
 import moment from "moment";
 //import "chartjs-adapter-moment";
 
-// Returns an array of dates between the two dates
-function getDatesBetween(startDate, endDate) {
-  const dates = [];
-
-  // Strip hours minutes seconds etc.
-  let currentDate = new Date(
-    startDate.getFullYear(),
-    startDate.getMonth(),
-    startDate.getDate()
-  );
-
-  while (currentDate <= endDate) {
-    dates.push(currentDate);
-
-    currentDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      currentDate.getDate() + 1 // Will increase month if over range
-    );
-  }
-
-  return dates;
-}
-
-function newDate(days) {
-  return moment().add(days, "d").toDate();
-}
-
 /**
  * Component wrapper that returns a refresh icon from Bootstrap's icon set.
  */
@@ -90,6 +62,7 @@ class BacktestComponent extends Component {
     };
     this.chartRef = React.createRef();
     // FIXME: limit to 8. enforce this.
+    // FIXME: explain how returns are compounded and portfolio rebalancing
     this.chartColors = ["SteelBlue", "Orange", "Teal", "FireBrick",
                         "Olive", "Sienna", "Purple", "Gold"]
 
@@ -190,7 +163,7 @@ class BacktestComponent extends Component {
       const dataset = {
         fill: false,
         lineTension: 0,
-        label: priceData[i].portfolio.name,
+        label: `${priceData[i].portfolio.name}(${priceData[i].portfolio.id})`,
         data: priceData[i].returns,
         backgroundColor: this.chartColors[i],
         borderColor: this.chartColors[i],
