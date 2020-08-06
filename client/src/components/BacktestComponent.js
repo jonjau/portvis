@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import StockService from "../service/StockService";
 import {
   Row,
   Col,
@@ -7,6 +6,8 @@ import {
   Button,
   ListGroup,
   ButtonGroup,
+  Alert,
+  Card,
 } from "react-bootstrap";
 import PortfolioService from "../service/PortfolioService";
 import BacktestService from "../service/BacktestService";
@@ -17,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Chart from "chart.js";
 import moment from "moment";
 //import "chartjs-adapter-moment";
+import _ from "lodash";
 
 /**
  * Component wrapper that returns a refresh icon from Bootstrap's icon set.
@@ -56,17 +58,22 @@ class BacktestComponent extends Component {
       stockHistory: [],
       portfolios: new Map(),
       selectedPortfolioIds: [],
-      startDate: moment().subtract(23, "days"),
-      endDate: moment().subtract(2, "days"),
+      startDate: moment().subtract(24, "days"),
+      endDate: moment().subtract(3, "days"),
       chartData: [],
     };
     this.chartRef = React.createRef();
-    // FIXME: limit to 8. enforce this.
-    // FIXME: explain how returns are compounded and portfolio rebalancing
-    this.chartColors = ["SteelBlue", "Orange", "Teal", "FireBrick",
-                        "Olive", "Sienna", "Purple", "Gold"]
-
-    this.refreshStock = this.refreshStock.bind(this);
+    // FIXME: improve tooltip readability
+    this.chartColors = [
+      "SteelBlue",
+      "Orange",
+      "Teal",
+      "FireBrick",
+      "Olive",
+      "Sienna",
+      "Purple",
+      "Gold",
+    ];
 
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
 
@@ -93,17 +100,6 @@ class BacktestComponent extends Component {
             response.data.map((portfolio) => [portfolio.id, portfolio])
           ),
         });
-      })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
-  }
-
-  refreshStock() {
-    StockService.getStockHistory("lorem ipsum")
-      .then((response) => {
-        //console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
-        this.setState({ stockHistory: response.data });
       })
       .catch((error) =>
         console.log(`error: ${JSON.stringify(error, null, 2)}`)
@@ -165,18 +161,16 @@ class BacktestComponent extends Component {
         lineTension: 0,
         label: `${priceData[i].portfolio.name}(${priceData[i].portfolio.id})`,
         data: priceData[i].returns,
-        backgroundColor: this.chartColors[i],
-        borderColor: this.chartColors[i],
+        backgroundColor: this.chartColors[i % this.chartColors.length],
+        borderColor: this.chartColors[i % this.chartColors.length],
       };
       return dataset;
     });
 
-    const data = {
-      // Labels should be Date objects
-      labels: dates,
-      datasets: [...datasets],
-    };
+    const startDate = this.state.startDate.format("YYYY-MM-DD");
+    const endDate = this.state.endDate.format("YYYY-MM-DD");
 
+    this.chart.options.title.text = `${startDate} to ${endDate}`;
     this.chart.data.labels = dates;
     this.chart.data.datasets = [...datasets];
     this.chart.update();
@@ -191,7 +185,7 @@ class BacktestComponent extends Component {
         responsive: true,
         title: {
           display: true,
-          text: "lorem ipsum",
+          text: "Select portfolios to backtest!",
         },
         tooltips: {
           position: "nearest",
@@ -232,9 +226,10 @@ class BacktestComponent extends Component {
   }
 
   render() {
+    //FIXME: select/deselect all button
     return (
       <Row>
-        <Col md="3" className="bg-secondary p-2 vh-100">
+        <Col md="3" className="bg-secondary p-2 min-vh-100">
           <ListGroup>
             <ListGroup.Item align="center" disable="true" variant="secondary">
               <Row>
@@ -306,18 +301,23 @@ class BacktestComponent extends Component {
             <tbody>
               {Array.from(this.state.portfolios.values()).map((portfolio) => (
                 <tr className="d-flex" key={portfolio.id}>
-                  <td className="col-8">{`${portfolio.name} (${portfolio.id})`}</td>
+                  <td className="col-8">
+                    {`${_.truncate(portfolio.name, {length: 18,})}
+                    (${portfolio.id})`}
+                  </td>
                   <td className="col-4">
                     {this.state.selectedPortfolioIds.includes(portfolio.id) ? (
                       <Button
-                        className="btn-danger p-1"
+                        variant="outline-danger"
+                        className="p-1"
                         onClick={() => this.deselectPortfolio(portfolio.id)}
                       >
                         Deselect
                       </Button>
                     ) : (
                       <Button
-                        className="btn-success p-1"
+                        variant="outline-success"
+                        className="p-1"
                         onClick={() => this.selectPortfolio(portfolio.id)}
                       >
                         Select
@@ -330,9 +330,35 @@ class BacktestComponent extends Component {
           </Table>
         </Col>
         <Col md="9">
-          <div className="w-100">
-            <canvas id="backtestChart" ref={this.chartRef}></canvas>
-          </div>
+          <Row>
+            <div className="w-100">
+              <canvas id="backtestChart" ref={this.chartRef}></canvas>
+            </div>
+          </Row>
+          <Row>
+            <Card className="m-4">
+              <Card.Header>
+                <h4>Assumptions and remarks</h4>
+              </Card.Header>
+              <Card.Body>
+                <ul>
+                  <li>
+                    The price metric used for each period is the OHLC average.
+                  </li>
+                  <li>
+                    Returns from assets are paid out daily and reinvested the
+                    following day.
+                  </li>
+                  <li>Portfolios are rebalanced daily.</li>
+                  <li>No fees associated with reinvesting and rebalancing.</li>
+                  <li>
+                    Figures are approximate (significant deviation for larger
+                    date ranges).
+                  </li>
+                </ul>
+              </Card.Body>
+            </Card>
+          </Row>
         </Col>
       </Row>
     );

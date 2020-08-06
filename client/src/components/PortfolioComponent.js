@@ -70,7 +70,6 @@ function LeftArrow() {
 }
 
 class PortfolioComponent extends Component {
-  // FIXME: clean up types in general, a lot of numeric IDs are strings now
   // FIXME: check if stocks exist!
   constructor(props) {
     super(props);
@@ -166,7 +165,6 @@ class PortfolioComponent extends Component {
 
   savePortfolioClicked() {
     const currId = this.state.currentPortfolioId;
-    const currPortfolio = this.state.portfolios.get(currId);
 
     PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
       .then((response) => {
@@ -252,10 +250,10 @@ class PortfolioComponent extends Component {
 
   render() {
     const { portfolios, currentPortfolioId } = this.state;
-
+    // FIXME: fix routing
     return (
       <Row>
-        <Col md={2} className="bg-secondary p-2 min-vh-100">
+        <Col md="2" className="bg-secondary p-2 min-vh-100">
           <Nav as={ListGroup} className="flex-column">
             <ListGroup.Item disable="true" variant="secondary">
               <ButtonGroup>
@@ -263,7 +261,7 @@ class PortfolioComponent extends Component {
                   Add new portfolio
                 </Button>
                 <Button
-                  className="btn-warning"
+                  variant="warning"
                   onClick={this.refreshPortfolios}
                 >
                   <RefreshIcon />
@@ -282,12 +280,13 @@ class PortfolioComponent extends Component {
                   this.props.history.push(`/portfolios/${portfolio.id}`);
                 }}
               >
-                {portfolio.name} ({portfolio.id})
+                {/* truncate portfolio name so display looks sensible */}
+                {_.truncate(portfolio.name, {'length':18})} ({portfolio.id})
               </Nav.Link>
             ))}
             <ListGroup.Item disable="true" variant="secondary">
               <Button
-                className="btn-danger"
+                variant="danger"
                 onClick={this.deleteAllPortfoliosClicked}
               >
                 Delete all portfolios
