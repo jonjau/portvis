@@ -11,6 +11,7 @@ import {
 import PortfolioEditComponent from "./PortfolioEditComponent";
 import PortfolioService from "../service/PortfolioService";
 import { Route } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
 import _ from "lodash";
 
 /**
@@ -260,29 +261,24 @@ class PortfolioComponent extends Component {
                 <Button className="btn-info" onClick={this.addPortfolioClicked}>
                   Add new portfolio
                 </Button>
-                <Button
-                  variant="warning"
-                  onClick={this.refreshPortfolios}
-                >
+                <Button variant="warning" onClick={this.refreshPortfolios}>
                   <RefreshIcon />
                 </Button>
               </ButtonGroup>
             </ListGroup.Item>
             {Array.from(portfolios.values()).map((portfolio) => (
-              <Nav.Link
-                as={ListGroup.Item}
-                variant="dark"
-                action
-                key={portfolio.id}
-                eventKey={`/${portfolio.id}`}
-                onClick={() => {
-                  this.setState({ currentPortfolioId: portfolio.id });
-                  this.props.history.push(`/portfolios/${portfolio.id}`);
-                }}
-              >
-                {/* truncate portfolio name so display looks sensible */}
-                {_.truncate(portfolio.name, {'length':18})} ({portfolio.id})
-              </Nav.Link>
+              <LinkContainer to={`/portfolios/${portfolio.id}/`}>
+                <Nav.Link
+                  as={ListGroup.Item}
+                  variant="dark"
+                  onClick={() =>
+                    this.setState({ currentPortfolioId: portfolio.id })
+                  }
+                >
+                  {/* truncate portfolio name so display looks sensible */}
+                  {_.truncate(portfolio.name, { length: 18 })} ({portfolio.id})
+                </Nav.Link>
+              </LinkContainer>
             ))}
             <ListGroup.Item disable="true" variant="secondary">
               <Button
@@ -298,7 +294,7 @@ class PortfolioComponent extends Component {
           {currentPortfolioId ? (
             <>
               <Route
-                path={`${this.props.match.path}/:portfolioId`}
+                path={`${this.props.match.path}/:portfolioId/`}
                 render={(props) => (
                   // instead of using higher order components, we can do
                   // {...props}
@@ -349,3 +345,19 @@ class PortfolioComponent extends Component {
 }
 
 export default PortfolioComponent;
+
+// another way of doing the SideNav items
+// <Nav.Link
+//   as={ListGroup.Item}
+//   variant="dark"
+//   action
+//   key={portfolio.id}
+//   eventKey={`/${portfolio.id}`}
+//   onClick={() => {
+//     this.setState({ currentPortfolioId: portfolio.id });
+//     this.props.history.push(`/portfolios/${portfolio.id}`);
+//   }}
+// >
+//   {/* truncate portfolio name so display looks sensible */}
+//   {_.truncate(portfolio.name, {'length':18})} ({portfolio.id})
+// </Nav.Link>

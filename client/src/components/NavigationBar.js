@@ -1,14 +1,23 @@
 import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 
 function NavigationBar() {
   return (
     <Navbar sticky="top" bg="dark" variant="dark">
-      <Navbar.Brand href="/">Portvis</Navbar.Brand>
+      <LinkContainer to="/">
+        <Navbar.Brand>Portvis</Navbar.Brand>
+      </LinkContainer>
       <Nav className="mr-auto">
-        <Nav.Link href="portfolios">Portfolios</Nav.Link>
-        <Nav.Link href="backtest">Backtest</Nav.Link>
-        <Nav.Link href="about">About</Nav.Link>
+        <LinkContainer to="/portfolios/">
+          <Nav.Link>Portfolios</Nav.Link>
+        </LinkContainer>
+        <LinkContainer to="/backtest/">
+          <Nav.Link>Backtest</Nav.Link>
+        </LinkContainer>
+        <LinkContainer to="/about/">
+          <Nav.Link>About</Nav.Link>
+        </LinkContainer>
       </Nav>
     </Navbar>
   );

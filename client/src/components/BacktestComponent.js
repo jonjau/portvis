@@ -6,7 +6,6 @@ import {
   Button,
   ListGroup,
   ButtonGroup,
-  Alert,
   Card,
 } from "react-bootstrap";
 import PortfolioService from "../service/PortfolioService";
@@ -346,11 +345,10 @@ class BacktestComponent extends Component {
                     The price metric used for each period is the OHLC average.
                   </li>
                   <li>
-                    Returns from assets are paid out daily and reinvested the
-                    following day.
+                    Returns from assets are compounded daily.
                   </li>
                   <li>Portfolios are rebalanced daily.</li>
-                  <li>No fees associated with reinvesting and rebalancing.</li>
+                  <li>No fees associated with rebalancing.</li>
                   <li>
                     Figures are approximate (significant deviation for larger
                     date ranges).
