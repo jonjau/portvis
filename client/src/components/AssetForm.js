@@ -13,6 +13,7 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+
 function AssetForm(props) {
   const formik = useFormik({
     initialValues: {
@@ -41,7 +42,7 @@ function AssetForm(props) {
           `Total allocation proportion must not exceed 100% of portfolio`,
           function (submittedProportion) {
             // true if valid, false if error
-            return (props.totalAllocation + submittedProportion) <= 1.0;
+            return props.totalAllocation + submittedProportion <= 1.0;
           }
         ),
     }),
@@ -112,3 +113,37 @@ function AssetForm(props) {
 }
 
 export default AssetForm;
+
+// const handleSearch = (query) => {
+//   console.log(`searching ${query}...`);
+//   setIsLoading(true);
+
+//   SearchService.getSymbols(query).then((response) => {
+//     const options = response.data.bestMatches.map((result) => result.symbol);
+//     setOptions(options);
+//     setIsLoading(false);
+//   });
+// };
+//   <AsyncTypeahead
+//   id="inputSymbol"
+//   inputProps={{
+//     id: "inputSymbol",
+//     name: "symbol",
+//   }}
+//   onInputChange={(value, event) => {
+//     formik.handleChange(event);
+//   }}
+//   onBlur={(event) => {
+//     const value = event.target.value;
+//     console.log(value);
+//     formik.values.symbol = value;
+//     //formik.handleBlur(event);
+//   }}
+//   // onChange={([value]) => {
+//   //   formik.values.symbol = value;
+//   // }}
+//   isLoading={isLoading}
+//   placeholder="e.g. NVDA"
+//   onSearch={handleSearch}
+//   options={options}
+// ></AsyncTypeahead>

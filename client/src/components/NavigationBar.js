@@ -1,8 +1,14 @@
 import React from "react";
-import { Navbar, Nav } from "react-bootstrap";
+import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
+
+import StockSearch from "./StockSearch";
+
 function NavigationBar() {
+
+
   return (
     <Navbar sticky="top" bg="dark" variant="dark">
       <LinkContainer to="/">
@@ -19,6 +25,7 @@ function NavigationBar() {
           <Nav.Link>About</Nav.Link>
         </LinkContainer>
       </Nav>
+      <StockSearch/>
     </Navbar>
   );
 }

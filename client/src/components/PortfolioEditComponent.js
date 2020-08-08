@@ -62,7 +62,7 @@ function PortfolioEditComponent(props) {
                   ).toFixed(2)}`}</td>
                   <td className="col-3">
                     <Button
-                      className="btn-danger"
+                      variant="outline-danger"
                       onClick={() => deleteAssetClicked(symbol)}
                     >
                       Delete

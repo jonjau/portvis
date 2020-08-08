@@ -251,7 +251,6 @@ class PortfolioComponent extends Component {
 
   render() {
     const { portfolios, currentPortfolioId } = this.state;
-    // FIXME: fix routing
     return (
       <Row>
         <Col md="2" className="bg-secondary p-2 min-vh-100">
@@ -267,11 +266,16 @@ class PortfolioComponent extends Component {
               </ButtonGroup>
             </ListGroup.Item>
             {Array.from(portfolios.values()).map((portfolio) => (
-              <LinkContainer to={`/portfolios/${portfolio.id}/`}>
+              <LinkContainer
+                to={`/portfolios/${portfolio.id}/`}
+                key={portfolio.id}
+              >
                 <Nav.Link
                   as={ListGroup.Item}
                   variant="dark"
+                  action
                   onClick={() =>
+                    // this.props.history.push(...) seems to work too
                     this.setState({ currentPortfolioId: portfolio.id })
                   }
                 >
