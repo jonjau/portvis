@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 //import StockService from "../service/StockService";
 
-import { Row, Col, Table, Container, Button } from "react-bootstrap";
-import { Route } from "react-router-dom";
+import { Row, Container, Button, Badge } from "react-bootstrap";
+//import { Route } from "react-router-dom";
 
 class StockComponent extends Component {
   constructor(props) {
@@ -14,13 +14,36 @@ class StockComponent extends Component {
   }
 
   render() {
+    //const stock = this.props.searchedStock;
     const stock = this.props.searchedStock;
+    console.log(stock);
 
     return (
       <Row className="bg-secondary min-vh-100">
         <Container className="bg-light min-vh-100">
-          {stock ? <div>{stock.description}</div> : <div>aaaa</div>}
-          <Button onClick={()=>console.log(stock)}>asdsad</Button>
+          {stock ? (
+            <Container className="m-2">
+              <h1>
+                <Badge variant="dark">{stock.Symbol}</Badge>
+                &nbsp; {stock.Name}
+              </h1>
+              <h3 className="text-muted">
+                {stock.Sector} | {stock.Industry}
+              </h3>
+              <h5 className="text-muted">{stock.AssetType}</h5>
+
+              <div>
+                {stock.Description}
+              </div>
+            </Container>
+          ) : (
+            <Container className="m-2">
+              <h5 className="text-muted">
+                Search for a stock in the search bar...
+              </h5>
+            </Container>
+          )}
+          <Button onClick={() => console.log(stock)}>asdsad</Button>
         </Container>
       </Row>
     );

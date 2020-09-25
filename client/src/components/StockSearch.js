@@ -4,9 +4,10 @@ import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import { Button, Form } from "react-bootstrap";
 
 import SearchService from "../service/SearchService";
+import { Redirect } from "react-router-dom";
 
 function StockSearch(props) {
-  const [_, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
 
   const ref = useRef();

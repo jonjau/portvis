@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
 //import "./PortvisApp.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -23,16 +23,12 @@ class PortvisApp extends Component {
   }
 
   handleStockSearch(symbol) {
-    alert(symbol);
     SearchService.getCompany(symbol)
       .then((response) => {
         this.setState({ searchedStock: response.data });
       })
-      .catch
+      .catch();
       //FIXME:
-      ();
-
-    //  this.props.history.push(`/stocks/`);
   }
 
   render() {
