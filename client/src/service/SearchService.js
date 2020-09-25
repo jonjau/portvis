@@ -18,6 +18,15 @@ class SearchService{
     const url = `http://127.0.0.1:8080/query?${params.toString()}`;
     return axios.get(url);
   }
+
+  getCompany(symbol) {
+    const params = new URLSearchParams({
+      company: symbol,
+      apikey: 123
+    });
+    const url = `http://127.0.0.1:8080/query?${params.toString()}`;
+    return axios.get(url);
+  }
 }
 
 export default new SearchService();

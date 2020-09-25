@@ -1,13 +1,10 @@
 import React from "react";
-import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
+import { Navbar, Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-
-import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 import StockSearch from "./StockSearch";
 
-function NavigationBar() {
-
+function NavigationBar(props) {
 
   return (
     <Navbar sticky="top" bg="dark" variant="dark">
@@ -15,6 +12,9 @@ function NavigationBar() {
         <Navbar.Brand>Portvis</Navbar.Brand>
       </LinkContainer>
       <Nav className="mr-auto">
+        <LinkContainer to="/stocks/">
+          <Nav.Link>Stocks</Nav.Link>
+        </LinkContainer>
         <LinkContainer to="/portfolios/">
           <Nav.Link>Portfolios</Nav.Link>
         </LinkContainer>
@@ -25,7 +25,7 @@ function NavigationBar() {
           <Nav.Link>About</Nav.Link>
         </LinkContainer>
       </Nav>
-      <StockSearch/>
+      <StockSearch handleStockSearch={props.handleStockSearch}/>
     </Navbar>
   );
 }

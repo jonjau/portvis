@@ -5,8 +5,8 @@ import { Button, Form } from "react-bootstrap";
 
 import SearchService from "../service/SearchService";
 
-function StockSearch() {
-  const [isLoading, setIsLoading] = useState(false);
+function StockSearch(props) {
+  const [_, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
 
   const ref = useRef();
@@ -15,10 +15,10 @@ function StockSearch() {
     setIsLoading(true);
 
     SearchService.getSymbols(query).then((response) => {
-      console.log(query);
       const options = response.data.bestMatches.map((result) => ({
         symbol: String(result.symbol),
         name: String(result.name),
+        //symbol_and_name: String(result.symbol) + String(result.name),
       }));
 
       setOptions(options);
@@ -29,15 +29,14 @@ function StockSearch() {
   const handleSubmit = () => {
     //FIXME: get company overview
     const symbol = ref.current.state.text;
-    alert(symbol);
-
+    props.handleStockSearch(symbol);
   };
 
   return (
     <Form inline>
       <AsyncTypeahead
         id="stock-search"
-        isLoading={isLoading}
+        isLoading={false}
         ref={ref}
         className="m-2"
         labelKey="symbol"
@@ -45,15 +44,14 @@ function StockSearch() {
         options={options}
         placeholder="Search for a US stock..."
         renderMenuItemChildren={(option, props) => (
-          <span>
+          <div>
             {option.symbol} ({option.name})
-          </span>
+          </div>
         )}
       />
       <Button variant="outline-info" onClick={handleSubmit}>
         Get overview
       </Button>
-      <Button onClick={() => console.log(ref.current.state.text)}>aaa</Button>
     </Form>
   );
 }

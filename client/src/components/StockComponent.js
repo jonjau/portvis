@@ -1,70 +1,41 @@
 import React, { Component } from "react";
-import StockService from "../service/StockService";
+//import StockService from "../service/StockService";
+
+import { Row, Col, Table, Container, Button } from "react-bootstrap";
+import { Route } from "react-router-dom";
 
 class StockComponent extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      stockHistory: [],
-    };
-
-    this.refreshStock = this.refreshStock.bind(this);
-    this.plotHistory = this.plotHistory.bind(this);
   }
 
   componentDidMount() {
-    //this.refreshStock();
-  }
-
-  refreshStock() {
-    StockService.getStockHistory("lorem ipsum")
-      .then((response) => {
-        //console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
-        this.setState({ stockHistory: response.data });
-      })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
-  }
-
-  plotHistory() {
-    const timeSeriesData = this.state.stockHistory.timeSeries;
-
-    const dataArray = Object.keys(timeSeriesData).map((dateTime) => [
-      new Date(dateTime),
-      this.getOHLCAverage(timeSeriesData[dateTime]),
-    ]);
-    //console.log(dataArray);
-    // new Dygraph(
-    //   // this is legacy apparently
-    //   this.refs.chart,
-    //   dataArray,
-    //   {}
-    // );
-  }
-
-  getOHLCAverage(prices) {
-    const keys = ["open", "high", "low", "close"];
-    let sum = 0;
-    for (let key of keys) {
-      sum += prices[key];
-    }
-    return sum / keys.length;
+    console.log(this.props.match.path);
   }
 
   render() {
+    const stock = this.props.searchedStock;
+
     return (
-      <div>
-        <h3>lorem</h3>
-        <textarea
-          defaultValue={JSON.stringify(this.state.stockHistory.timeSeries)}
-        ></textarea>
-        <div ref="chart" />
-        <button onClick={() => this.plotHistory()}>plotHist</button>
-      </div>
+      <Row className="bg-secondary min-vh-100">
+        <Container className="bg-light min-vh-100">
+          {stock ? <div>{stock.description}</div> : <div>aaaa</div>}
+          <Button onClick={()=>console.log(stock)}>asdsad</Button>
+        </Container>
+      </Row>
     );
   }
 }
 
 export default StockComponent;
+
+// refreshStock() {
+//   StockService.getStockHistory("lorem ipsum")
+//     .then((response) => {
+//       //console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
+//       this.setState({ stockHistory: response.data });
+//     })
+//     .catch((error) =>
+//       console.log(`error: ${JSON.stringify(error, null, 2)}`)
+//     );
+// }

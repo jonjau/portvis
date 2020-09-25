@@ -98,6 +98,7 @@ class PortfolioComponent extends Component {
   }
 
   componentDidMount() {
+    console.log("portfolio component did mount")
     this.refreshPortfolios();
   }
 
@@ -166,6 +167,7 @@ class PortfolioComponent extends Component {
 
   savePortfolioClicked() {
     const currId = this.state.currentPortfolioId;
+    console.log(this.state.portfolios);
 
     PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
       .then((response) => {
@@ -206,6 +208,7 @@ class PortfolioComponent extends Component {
       initialValue: 100,
       allocations: { MSFT: 1.0 },
     };
+    console.log(`${this.props.match.path}`);
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
         // what is this condition for??
@@ -298,7 +301,8 @@ class PortfolioComponent extends Component {
           {currentPortfolioId ? (
             <>
               <Route
-                path={`${this.props.match.path}/:portfolioId/`}
+                // can access with this.props.match.params.portfolioId
+                path={`${this.props.match.path}:portfolioId/`}
                 render={(props) => (
                   // instead of using higher order components, we can do
                   // {...props}
