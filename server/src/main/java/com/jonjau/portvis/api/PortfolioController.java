@@ -24,7 +24,7 @@ public class PortfolioController {
         this.portfolioRepository = portfolioRepository;
     }
 
-    // trailing slash /: stay consistent
+    // trailing slash "/", stay consistent
     @GetMapping("/portfolios/")
     public List<Portfolio> getAllPortfolios() {
         return portfolioRepository.findAll();
@@ -40,7 +40,13 @@ public class PortfolioController {
     }
 
     @PostMapping("/portfolios/")
-    public Portfolio createPortfolio(@Valid @RequestBody Portfolio portfolio) {
+    public Portfolio createPortfolio(@Valid @RequestBody Portfolio portfolio) throws Exception {
+        // FIXME: ugly check
+        boolean isFullyAllocated = portfolio.getAllocations().values().stream()
+                .mapToDouble(d -> d).sum() == 1.0;
+        if (!isFullyAllocated) {
+            throw new Exception("Total portfolio allocation must exactly equal 100%");
+        }
         return portfolioRepository.save(portfolio);
     }
 
@@ -52,6 +58,12 @@ public class PortfolioController {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new Exception(
                         "Portfolio with ID " + portfolioId + " not found."));
+
+        boolean isFullyAllocated = portfolio.getAllocations().values().stream()
+                .mapToDouble(d -> d).sum() == 1.0;
+        if (!isFullyAllocated) {
+            throw new Exception("Total portfolio allocation must exactly equal 100%");
+        }
 
         portfolio.setName(portfolioDetails.getName());
         portfolio.setInitialValue(portfolioDetails.getInitialValue());

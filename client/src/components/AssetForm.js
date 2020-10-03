@@ -13,9 +13,8 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+
 function AssetForm(props) {
-  //TODO: validation, portfolio initial value
-  // this is a React hook, works for functional components, like this one.
   const formik = useFormik({
     initialValues: {
       symbol: "",
@@ -28,17 +27,24 @@ function AssetForm(props) {
         .test(
           "duplicate-asset-test",
           `Asset already exists in portfolio`,
-          function (value) {
+          function (submittedSymbol) {
             // true if valid, false if error
-            //FIXME: message not appearing
-            return !props.assetSymbols.includes(value);
+            return !props.assetSymbols.includes(submittedSymbol);
           }
         ),
       proportion: Yup.number()
         .required("Required")
         .typeError("Must be a number")
         .min(0, "Must be between 0 and 1")
-        .max(1, "must be between 0 and 1"),
+        .max(1, "must be between 0 and 1")
+        .test(
+          "allocation-limit-test",
+          `Total allocation proportion must not exceed 100% of portfolio`,
+          function (submittedProportion) {
+            // true if valid, false if error
+            return props.totalAllocation + submittedProportion <= 1.0;
+          }
+        ),
     }),
     onSubmit: (values) => {
       props.submitAction({
@@ -46,7 +52,7 @@ function AssetForm(props) {
         proportion: Number(values.proportion),
       });
     },
-    enableReinitialize: true
+    enableReinitialize: true,
   });
 
   // `name` in a Form.Control (like HTML's <input>) identifies what the
@@ -107,3 +113,37 @@ function AssetForm(props) {
 }
 
 export default AssetForm;
+
+// const handleSearch = (query) => {
+//   console.log(`searching ${query}...`);
+//   setIsLoading(true);
+
+//   SearchService.getSymbols(query).then((response) => {
+//     const options = response.data.bestMatches.map((result) => result.symbol);
+//     setOptions(options);
+//     setIsLoading(false);
+//   });
+// };
+//   <AsyncTypeahead
+//   id="inputSymbol"
+//   inputProps={{
+//     id: "inputSymbol",
+//     name: "symbol",
+//   }}
+//   onInputChange={(value, event) => {
+//     formik.handleChange(event);
+//   }}
+//   onBlur={(event) => {
+//     const value = event.target.value;
+//     console.log(value);
+//     formik.values.symbol = value;
+//     //formik.handleBlur(event);
+//   }}
+//   // onChange={([value]) => {
+//   //   formik.values.symbol = value;
+//   // }}
+//   isLoading={isLoading}
+//   placeholder="e.g. NVDA"
+//   onSearch={handleSearch}
+//   options={options}
+// ></AsyncTypeahead>

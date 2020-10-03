@@ -29,13 +29,9 @@ public class BacktestService {
         this.client = client;
     }
 
-    public Map<LocalDate, Double> returnsCompoundedDaily(Portfolio portfolio, LocalDate start, LocalDate end)
-            throws IOException {
-
-        // validate date, validate allocation proportions: must add up to one
-
-        LocalDate startDate = start;
-        LocalDate endDate = end;
+    public Map<LocalDate, Double> returnsCompoundedDaily(
+            Portfolio portfolio, LocalDate startDate, LocalDate endDate
+    ) throws IOException {
 
         double portfolioValue = portfolio.getInitialValue();
         Map<String, Double> allocations = portfolio.getAllocations();
@@ -46,8 +42,9 @@ public class BacktestService {
             assetPrices.put(symbol, data);
         }
 
-        // dates with price data i.e. trading days
-        // assumes all assets have been floated by the start date
+        // get dates with price data i.e. trading days
+        // if at least one asset hasn't been floated by the start date,
+        // then a DateTime exception will be thrown by the date seeking functions
         Set<LocalDate> validDates = assetPrices.entrySet().iterator().next().getValue().keySet();
 
         Map<LocalDate, Double> portfolioValueOverTime = new TreeMap<>();
@@ -136,15 +133,13 @@ public class BacktestService {
                             return newList;
                         })
                 );
+        // this is one way to sort a map by keys...
         Map<LocalDate, List<Double>> sortedMap = new TreeMap<>(resultMap);
         return sortedMap;
     }
 
-    public LocalDate seekNextValidDate(
-            LocalDate dateTime, Set<LocalDate> validDates
-    ) {
+    public LocalDate seekNextValidDate(LocalDate dateTime, Set<LocalDate> validDates) {
         int daysToSkip = 7;
-
         if (dateTime.isBefore(LocalDate.now())) {
             for (int i = 1; i <= daysToSkip; i++) {
                 if (validDates.contains(dateTime.plusDays(i))) {
@@ -153,7 +148,7 @@ public class BacktestService {
             }
         }
         throw new DateTimeException("No valid date within " + daysToSkip +
-                " found after " + dateTime.toString());
+                " days found after " + dateTime.toString());
     }
 
     public boolean isWeekend(LocalDate datetime) {
@@ -161,9 +156,7 @@ public class BacktestService {
         return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
     }
 
-    public LocalDate seekPreviousValidDate(
-            LocalDate dateTime, Set<LocalDate> validDates
-    ) {
+    public LocalDate seekPreviousValidDate(LocalDate dateTime, Set<LocalDate> validDates) {
         int daysToSkip = 7;
 
         if (dateTime.isBefore(LocalDate.now())) {
@@ -174,6 +167,6 @@ public class BacktestService {
             }
         }
         throw new DateTimeException("No valid date within " + daysToSkip +
-                " found  before " + dateTime.toString());
+                " days found  before " + dateTime.toString());
     }
 }

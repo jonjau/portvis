@@ -9,16 +9,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static com.jonjau.portvis.timeseries.MetaData.META_DATA_RESPONSE_KEY;
 import static com.jonjau.portvis.timeseries.MetaData.TIMEZONE_KEY;
 
+import com.jonjau.portvis.search.SymbolSearchResult;
 import com.jonjau.portvis.timeseries.MetaData;
 
 /**
@@ -53,6 +51,7 @@ public final class DeserializerUtil {
 
     public static <T> Map<LocalDate, T> getDateObjectMap(JsonNode jsonNode, Class<T> resultObject) {
 
+        // TreeMap ensures sorted order
         Map<LocalDate, T> dateObjectMap = new TreeMap<>();
         // assume metadata always exists
         //String timezone = jsonNode.get(META_DATA_RESPONSE_KEY).get(TIMEZONE_KEY).textValue();
@@ -76,6 +75,29 @@ public final class DeserializerUtil {
         });
         return dateObjectMap;
     }
+
+    public static <T> List<T> getObjectList(JsonNode jsonNode, Class<T> resultObject) {
+        List<T> objectList = new ArrayList<>();
+
+        jsonNode.fields().forEachRemaining(nodeEntry -> {
+                JsonNode arrNode = nodeEntry.getValue();
+                if (arrNode.isArray()) {
+                    for (JsonNode dataNode : arrNode) {
+                        try {
+                            T data =
+                            JsonParser.toObject(JsonParser.toJson(sanitizeNodeKeys(dataNode)),
+                            resultObject);
+                            objectList.add(data);
+                        } catch (IOException | DateTimeParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        });
+        return objectList;
+    }
+
+
 
     public static LocalDate parseDate(String dateString)
             throws DateTimeParseException {

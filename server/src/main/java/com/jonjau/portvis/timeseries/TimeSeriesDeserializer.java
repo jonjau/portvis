@@ -15,7 +15,7 @@ public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
 
     @Override
     public TimeSeriesResult deserialize(com.fasterxml.jackson.core.JsonParser parser,
-            DeserializationContext context) throws IOException {
+                                        DeserializationContext context) throws IOException {
 
         TimeSeriesResult timeSeriesResult = new TimeSeriesResult();
         ObjectCodec objectCodec = parser.getCodec();

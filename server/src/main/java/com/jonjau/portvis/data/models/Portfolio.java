@@ -3,11 +3,14 @@ package com.jonjau.portvis.data.models;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.Map;
 import java.util.TreeMap;
 
 @Data
-// defaults to the name of the class
+// entity defaults to the name of the class
 @Entity(name="portfolio")
 @Table(name="PORTFOLIO")
 public class Portfolio {
@@ -15,10 +18,15 @@ public class Portfolio {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Size(max=255, message = "Portfolio name must be between 0 and 255 characters.")
     private String name;
 
+    //FIXME: BIGDECIMAL????
+    @Min(value=0, message="Portfolio initial value must be between 0 and 1 billion.")
+    @Max(value=1_000_000_000, message="Portfolio initial value must be between 0 and 1 billion.")
     private double initialValue;
 
+    //FIXME: BIGDECIMAL????
     @ElementCollection
     // change to Long maybe?
     // TreeMap so contents are ordered and sorted
