@@ -4,13 +4,14 @@ import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import { Button, Form } from "react-bootstrap";
 
 import SearchService from "../service/SearchService";
-import { Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 function StockSearch(props) {
   const [, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
 
   const ref = useRef();
+  const history = useHistory();
 
   const handleSearch = (query) => {
     setIsLoading(true);
@@ -30,6 +31,7 @@ function StockSearch(props) {
   const handleSubmit = () => {
     //FIXME: get company overview
     const symbol = ref.current.state.text;
+    history.push("/stocks/")
     props.handleStockSearch(symbol);
   };
 

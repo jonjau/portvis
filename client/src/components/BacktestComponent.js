@@ -349,6 +349,7 @@ class BacktestComponent extends Component {
                   </li>
                   <li>Portfolios are rebalanced daily.</li>
                   <li>No fees associated with rebalancing.</li>
+                  <li>Prices are not adjusted after stock splits.</li>
                   <li>
                     Figures are approximate (significant deviation for larger
                     date ranges).
