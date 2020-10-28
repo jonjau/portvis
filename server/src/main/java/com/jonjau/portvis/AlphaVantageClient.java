@@ -2,8 +2,8 @@ package com.jonjau.portvis;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
+import com.jonjau.portvis.company.Company;
 import com.jonjau.portvis.search.SymbolSearchDeserializer;
 import com.jonjau.portvis.search.SymbolSearchResult;
 import com.jonjau.portvis.timeseries.TimeSeriesDeserializer;
@@ -40,6 +40,10 @@ public class AlphaVantageClient {
         return getSymbolSearch(keywords);
     }
 
+    public Company getCompanyOverviewResult(String symbol) throws IOException {
+        return getCompanyOverview(symbol);
+    }
+
     private <T> T sendRequest(String queryParamString, Class<T> resultObject) 
             throws IOException{
 
@@ -72,6 +76,21 @@ public class AlphaVantageClient {
         // this is blocking code: slow
         String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
 
-        return JsonParser.toObject(json, SymbolSearchResult .class);
+        return JsonParser.toObject(json, SymbolSearchResult.class);
+    }
+
+    private Company getCompanyOverview(String symbol) throws IOException {
+        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 2048)).build();
+        WebClient webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).build();
+        URI uri = UriComponentsBuilder.newInstance().scheme("https")
+                .host("www.alphavantage.co").path("/query")
+                .queryParam("function", "OVERVIEW")
+                .queryParam("symbol", symbol)
+                .queryParam("apikey", "D2D48LZKE59QAB83").build().toUri();
+
+        String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
+
+        return JsonParser.toObject(json, Company.class);
     }
 }
