@@ -29,7 +29,6 @@ function StockSearch(props) {
   };
 
   const handleSubmit = () => {
-    //FIXME: get company overview
     const symbol = ref.current.state.text;
     history.push("/stocks/")
     props.handleStockSearch(symbol);

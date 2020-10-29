@@ -62,7 +62,6 @@ class BacktestComponent extends Component {
       chartData: [],
     };
     this.chartRef = React.createRef();
-    // FIXME: improve tooltip readability
     this.chartColors = [
       "SteelBlue",
       "Orange",
@@ -225,7 +224,6 @@ class BacktestComponent extends Component {
   }
 
   render() {
-    //FIXME: select/deselect all button
     return (
       <Row>
         <Col md="3" className="bg-secondary p-2 min-vh-100">
@@ -293,6 +291,32 @@ class BacktestComponent extends Component {
           <Table bordered hover variant="dark" className="table-condensed">
             <thead>
               <tr className="d-flex">
+                <td className="col-12 text-center">
+                  <ButtonGroup>
+                    <Button
+                      variant="outline-success"
+                      onClick={() =>
+                        Array.from(this.state.portfolios.keys()).forEach((id) =>
+                          this.selectPortfolio(id)
+                        )
+                      }
+                    >
+                      Select all
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() =>
+                        Array.from(this.state.portfolios.keys()).forEach((id) =>
+                          this.deselectPortfolio(id)
+                        )
+                      }
+                    >
+                      Deselect all
+                    </Button>
+                  </ButtonGroup>
+                </td>
+              </tr>
+              <tr className="d-flex">
                 <th className="col-8">Portfolio Name (ID)</th>
                 <th className="col-4"></th>
               </tr>
@@ -301,7 +325,7 @@ class BacktestComponent extends Component {
               {Array.from(this.state.portfolios.values()).map((portfolio) => (
                 <tr className="d-flex" key={portfolio.id}>
                   <td className="col-8">
-                    {`${_.truncate(portfolio.name, {length: 18,})}
+                    {`${_.truncate(portfolio.name, { length: 18 })}
                     (${portfolio.id})`}
                   </td>
                   <td className="col-4">
@@ -342,11 +366,13 @@ class BacktestComponent extends Component {
               <Card.Body>
                 <ul>
                   <li>
-                    The price metric used for each period is the OHLC average.
+                    Fetching price data for diverse portfolios is slow (a few
+                    seconds for each distinct stock).
                   </li>
                   <li>
-                    Returns from assets are compounded daily.
+                    The price metric used for each period is the OHLC average.
                   </li>
+                  <li>Returns from assets are compounded daily.</li>
                   <li>Portfolios are rebalanced daily.</li>
                   <li>No fees associated with rebalancing.</li>
                   <li>Prices are not adjusted after stock splits.</li>

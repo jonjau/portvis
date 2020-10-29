@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-//import "./PortvisApp.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import StockComponent from "./StockComponent";
@@ -11,9 +10,13 @@ import NavigationBar from "./NavigationBar";
 
 import SearchService from "../service/SearchService";
 import AboutComponent from "./AboutComponent";
+import FrontPageComponent from "./FrontPageComponent";
+
+import { ALPHAVANTAGE_API_KEY } from "../constants";
 
 function PortvisApp() {
   const [searchedStock, setSearchedStock] = useState(null);
+  const [apiKey, setApiKey] = useState(ALPHAVANTAGE_API_KEY);
 
   function handleStockSearch(symbol) {
     SearchService.getCompany(symbol)
@@ -23,7 +26,7 @@ function PortvisApp() {
       .catch((error) =>
         console.log(`error: ${JSON.stringify(error, null, 2)}`)
       );
-      // FIXME: if stock not found, need to fail: fix this in the back end
+    // FIXME: if stock not found, need to fail: fix this in the back end
   }
 
   return (
@@ -33,7 +36,7 @@ function PortvisApp() {
         <div className="container-fluid flex-grow-1">
           <Switch>
             {/* some paths DON'T have to be exact in this case */}
-            <Route path="/" exact render={() => <div>tempo</div>} />
+            <Route path="/" exact component={FrontPageComponent} />
             <Route
               path="/stocks/"
               render={(props) => (
@@ -42,7 +45,16 @@ function PortvisApp() {
             />
             <Route path="/backtest/" component={BacktestComponent} />
             <Route path="/portfolios/" component={PortfolioComponent} />
-            <Route path="/about/" component={AboutComponent} />
+            <Route
+              path="/about/"
+              render={(props) => (
+                <AboutComponent
+                  setApiKey={setApiKey}
+                  apiKey={apiKey}
+                  {...props}
+                />
+              )}
+            />
             <Route
               render={() => (
                 <h2 className="text-center">404: Page not found.</h2>
@@ -50,11 +62,14 @@ function PortvisApp() {
             />
           </Switch>
         </div>
-        <footer className="bg-info">hello my name is footer</footer>
+        <footer className="bg-dark text-center">
+          <a className="text-white" href="https://github.com/jonjau/portvis">
+            source code
+          </a>
+        </footer>
       </Router>
     </>
   );
 }
 
-// <Route render={() => <h1>404: page not found</h1>} />
 export default PortvisApp;

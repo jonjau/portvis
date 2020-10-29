@@ -334,7 +334,7 @@ class PortfolioComponent extends Component {
                 </Button>
                 {this.isPortfolioFullyAllocated() ? (
                   <Alert variant="warning" className="m-2">
-                    Total portfolio allocation must be exactly 100%. Add more
+                    Total portfolio allocation must be exactly 100%. Adjust
                     assets to reach 100% total allocation before saving changes.
                   </Alert>
                 ) : null}
