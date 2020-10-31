@@ -63,7 +63,8 @@ function PortvisApp() {
           </Switch>
         </div>
         <footer className="bg-dark text-center">
-          <a className="text-white" href="https://github.com/jonjau/portvis">
+          <a className="text-white" href="https://github.com/jonjau/portvis"
+             target="_blank"  rel="noopener noreferrer">
             source code
           </a>
         </footer>

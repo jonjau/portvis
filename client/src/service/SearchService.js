@@ -9,7 +9,7 @@ class SearchService {
     // interpret this as a Java List<Long>. id=4&id=5 is also understood.
     const params = new URLSearchParams({
       keywords: keywords,
-      apikey: PortvisApp.apikey,
+      apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
     return axios.get(url);
@@ -18,7 +18,7 @@ class SearchService {
   getCompany(symbol) {
     const params = new URLSearchParams({
       company: symbol,
-      apikey: PortvisApp.apikey,
+      apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
     return axios.get(url);

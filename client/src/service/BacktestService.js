@@ -1,5 +1,6 @@
 import axios from "axios";
 import { PORTVIS_API_URL } from "../constants";
+import PortvisApp from "../components/PortvisApp";
 
 class BacktestService {
   getReturns(portfolioIds, startDate, endDate) {
@@ -10,6 +11,7 @@ class BacktestService {
       start: startDate,
       end: endDate,
       id: portfolioIds,
+      apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/backtest?${params.toString()}`;
     return axios.get(url);

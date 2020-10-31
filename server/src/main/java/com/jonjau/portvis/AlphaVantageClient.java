@@ -32,19 +32,19 @@ public class AlphaVantageClient {
     // #result is written in SpEL, Spring Expression Language, it means
     // "the variable with the name 'symbol'"
     @Cacheable(value="timeSeriesResults", key="#symbol")
-    public TimeSeriesResult getTimeSeriesResult(String symbol) throws IOException {
-        return sendRequest(symbol, TimeSeriesResult.class);
+    public TimeSeriesResult getTimeSeriesResult(String symbol, String apiKey) throws IOException {
+        return sendRequest(symbol, TimeSeriesResult.class, apiKey);
     }
 
-    public SymbolSearchResult getSymbolSearchResult(String keywords) throws IOException {
-        return getSymbolSearch(keywords);
+    public SymbolSearchResult getSymbolSearchResult(String keywords, String apiKey) throws IOException {
+        return getSymbolSearch(keywords, apiKey);
     }
 
-    public Company getCompanyOverviewResult(String symbol) throws IOException {
-        return getCompanyOverview(symbol);
+    public Company getCompanyOverviewResult(String symbol, String apiKey) throws IOException {
+        return getCompanyOverview(symbol, apiKey);
     }
 
-    private <T> T sendRequest(String queryParamString, Class<T> resultObject) 
+    private <T> T sendRequest(String queryParamString, Class<T> resultObject, String apiKey)
             throws IOException{
 
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
@@ -55,7 +55,7 @@ public class AlphaVantageClient {
             .queryParam("function", "TIME_SERIES_DAILY")
             .queryParam("symbol", queryParamString)
             .queryParam("outputsize", "full")
-            .queryParam("apikey", "D2D48LZKE59QAB83").build().toUri();
+            .queryParam("apikey", apiKey).build().toUri();
 
         // this is blocking code: slow
         String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
@@ -63,7 +63,7 @@ public class AlphaVantageClient {
         return JsonParser.toObject(json, resultObject);
     }
 
-    private SymbolSearchResult getSymbolSearch(String symbol) throws IOException {
+    private SymbolSearchResult getSymbolSearch(String symbol, String apiKey) throws IOException {
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 2048)).build();
         WebClient webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).build();
@@ -71,7 +71,7 @@ public class AlphaVantageClient {
                 .host("www.alphavantage.co").path("/query")
                 .queryParam("function", "SYMBOL_SEARCH")
                 .queryParam("keywords", symbol)
-                .queryParam("apikey", "D2D48LZKE59QAB83").build().toUri();
+                .queryParam("apikey", apiKey).build().toUri();
 
         // this is blocking code: slow
         String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
@@ -79,7 +79,7 @@ public class AlphaVantageClient {
         return JsonParser.toObject(json, SymbolSearchResult.class);
     }
 
-    private Company getCompanyOverview(String symbol) throws IOException {
+    private Company getCompanyOverview(String symbol, String apiKey) throws IOException {
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 2048)).build();
         WebClient webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).build();
@@ -87,7 +87,7 @@ public class AlphaVantageClient {
                 .host("www.alphavantage.co").path("/query")
                 .queryParam("function", "OVERVIEW")
                 .queryParam("symbol", symbol)
-                .queryParam("apikey", "D2D48LZKE59QAB83").build().toUri();
+                .queryParam("apikey", apiKey).build().toUri();
 
         String json = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
 
