@@ -12,14 +12,14 @@ function NavigationBar(props) {
         <Navbar.Brand>Portvis</Navbar.Brand>
       </LinkContainer>
       <Nav className="mr-auto">
-        <LinkContainer to="/stocks/">
-          <Nav.Link>Stocks</Nav.Link>
-        </LinkContainer>
         <LinkContainer to="/portfolios/">
           <Nav.Link>Portfolios</Nav.Link>
         </LinkContainer>
         <LinkContainer to="/backtest/">
           <Nav.Link>Backtest</Nav.Link>
+        </LinkContainer>
+        <LinkContainer to="/stocks/">
+          <Nav.Link>Stocks</Nav.Link>
         </LinkContainer>
         <LinkContainer to="/about/">
           <Nav.Link>About</Nav.Link>

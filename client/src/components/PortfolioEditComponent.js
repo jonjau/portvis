@@ -18,8 +18,6 @@ function PortfolioEditComponent(props) {
     portfolioDetailsSubmitted,
   } = props;
   // Doesn't have to be called submitAction
-  // FIXME: allocations must add up to 1
-  // FIXME: asset search endpoints
   return (
     <>
       <Row>

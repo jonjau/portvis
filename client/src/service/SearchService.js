@@ -1,30 +1,26 @@
 import axios from "axios";
+import { PORTVIS_API_URL } from "../constants";
+import PortvisApp from "../components/PortvisApp";
 
-class SearchService{
-  // TODO: make localhost url generic
-  // getReturns(portfolioId) {
-  //   return axios.get(`http://127.0.0.1:8080/backtest`);
-  // }
-
+class SearchService {
   getSymbols(keywords) {
-    // FIXME: URL encoding
     // URL encoding of multiple IDs: id:[4,5] -> id=4%2C5 ("," becomes %2C)
     // Jackson (the deserializer in the Spring backend) is able to
     // interpret this as a Java List<Long>. id=4&id=5 is also understood.
     const params = new URLSearchParams({
       keywords: keywords,
-      apikey: 123
+      apiKey: PortvisApp.apiKey,
     });
-    const url = `http://127.0.0.1:8080/query?${params.toString()}`;
+    const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
     return axios.get(url);
   }
 
   getCompany(symbol) {
     const params = new URLSearchParams({
       company: symbol,
-      apikey: 123
+      apiKey: PortvisApp.apiKey,
     });
-    const url = `http://127.0.0.1:8080/query?${params.toString()}`;
+    const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
     return axios.get(url);
   }
 }

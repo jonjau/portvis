@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,13 @@ public class PortfolioController {
     @PostMapping("/portfolios/")
     public Portfolio createPortfolio(@Valid @RequestBody Portfolio portfolio) throws Exception {
         // FIXME: ugly check
-        boolean isFullyAllocated = portfolio.getAllocations().values().stream()
-                .mapToDouble(d -> d).sum() == 1.0;
+//        boolean isFullyAllocated = portfolio.getAllocations().values().stream()
+//                .mapToDouble(d -> d).sum() == 1.0;
+        BigDecimal sum = new BigDecimal(0);
+        for (BigDecimal d : portfolio.getAllocations().values()) {
+            sum = sum.add(d);
+        }
+        boolean isFullyAllocated = sum.compareTo(BigDecimal.ONE) == 0;
         if (!isFullyAllocated) {
             throw new Exception("Total portfolio allocation must exactly equal 100%");
         }
@@ -59,8 +65,11 @@ public class PortfolioController {
                 .orElseThrow(() -> new Exception(
                         "Portfolio with ID " + portfolioId + " not found."));
 
-        boolean isFullyAllocated = portfolio.getAllocations().values().stream()
-                .mapToDouble(d -> d).sum() == 1.0;
+        BigDecimal sum = new BigDecimal(0);
+        for (BigDecimal d : portfolio.getAllocations().values()) {
+            sum = sum.add(d);
+        }
+        boolean isFullyAllocated = sum.compareTo(BigDecimal.ONE) == 0;
         if (!isFullyAllocated) {
             throw new Exception("Total portfolio allocation must exactly equal 100%");
         }

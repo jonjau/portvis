@@ -1,6 +1,7 @@
 package com.jonjau.portvis.api;
 
 import com.jonjau.portvis.AlphaVantageClient;
+import com.jonjau.portvis.company.Company;
 import com.jonjau.portvis.search.SymbolSearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class SearchController {
     private final AlphaVantageClient client;
@@ -19,13 +21,21 @@ public class SearchController {
         this.client = client;
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
-    @GetMapping(value = "/query", params = { "keywords", "apikey" })
-    public SymbolSearchResult getSymbolSearch(@RequestParam("keywords") String keywords)
+    @GetMapping(value = "/query", params = {"keywords", "apiKey"})
+    public SymbolSearchResult getSymbolSearch(
+            @RequestParam("keywords") String keywords,
+            @RequestParam("apiKey") String apiKey)
             throws IOException {
 
-        SymbolSearchResult data = client.getSymbolSearchResult(keywords);
+        return client.getSymbolSearchResult(keywords, apiKey);
+    }
 
-        return data;
+    @GetMapping(value = "/query", params = {"company", "apiKey"})
+    public Company getCompanyOverview(
+            @RequestParam("company") String symbol,
+            @RequestParam("apiKey") String apiKey)
+            throws IOException {
+
+        return client.getCompanyOverviewResult(symbol, apiKey);
     }
 }

@@ -1,18 +1,14 @@
 package com.jonjau.portvis.api;
 
-import com.jonjau.portvis.backtest.BacktestRequest;
 import com.jonjau.portvis.backtest.BacktestService;
 import com.jonjau.portvis.data.PortfolioRepository;
 import com.jonjau.portvis.data.models.Portfolio;
-import com.jonjau.portvis.utils.DateUtil;
 import com.jonjau.portvis.utils.DeserializerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,15 +27,14 @@ public class BacktestController {
         this.backtestService = backtestService;
     }
 
-    @GetMapping(value = "/backtest", params = {"id", "start", "end"})
-    public Map<LocalDate, List<Double>> getReturns(
+    @GetMapping(value = "/backtest", params = {"id", "start", "end", "apiKey"})
+    public Map<LocalDate, List<BigDecimal>> getReturns(
             @RequestParam("id") List<Long> portfolioIds,
             @RequestParam("start") String startDateString,
-            @RequestParam("end") String endDateString
+            @RequestParam("end") String endDateString,
+            @RequestParam("apiKey") String apiKey
     ) throws Exception {
 
-        //System.out.println(portfolioIds);
-        //Date startDate = DeserializerUtil.parseDate(startDateString);
         LocalDate start = DeserializerUtil.parseDate(startDateString);
         LocalDate end = DeserializerUtil.parseDate(endDateString);
 
@@ -48,10 +43,8 @@ public class BacktestController {
                 .filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toList());
 
-        //Date endDate = DeserializerUtil.parseDate(endDateString);
-
-        Map<LocalDate, List<Double>> returns = backtestService.returnsCompoundedDaily(
-                portfolios, start, end);
+        Map<LocalDate, List<BigDecimal>> returns = backtestService.returnsCompoundedDaily(
+                portfolios, start, end, apiKey);
 
 //        Map<Date, List<Double>> returns = new TreeMap<>();
 //        returns.put(DeserializerUtil.parseDate("2020-07-12"), Arrays.asList(101.57485468921821, 101.57485468921821));
@@ -63,30 +56,4 @@ public class BacktestController {
         System.out.println(returns);
         return returns;
     }
-
-
-//    @GetMapping(value = "/backtest")
-//    public Map<Date, List<Double>> getReturns(@RequestBody BacktestRequest backtestRequest
-//    ) throws Exception {
-//
-//        List<Long> portfolioIds = backtestRequest.getPortfolioIds();
-//        List<Portfolio> portfolios = portfolioIds.stream()
-//                .map(portfolioRepository::findById)
-//                .filter(Optional::isPresent).map(Optional::get)
-//                .collect(Collectors.toList());
-//
-//        Date startDate = DateUtil.asDate(backtestRequest.getStart());
-//        Date endDate = DateUtil.asDate(backtestRequest.getEnd());
-//        Map<Date, List<Double>> returns = backtestService.returnsCompoundedDaily(portfolios, startDate, endDate);
-////        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-////                .orElseThrow(() -> new Exception(
-////                        "Portfolio with ID " + portfolioId + " not found."));
-////
-////        Date startDate = DeserializerUtil.parseDate(startDateString);
-////        Date endDate = DeserializerUtil.parseDate(endDateString);
-////
-////        Map<Date, Double> returns = backtestService.returnsCompoundedDaily(
-////                portfolio, startDate, endDate);
-//        return returns;
-//    }
 }

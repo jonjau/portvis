@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,16 +31,16 @@ public class BacktestService {
         this.client = client;
     }
 
-    public Map<LocalDate, Double> returnsCompoundedDaily(
-            Portfolio portfolio, LocalDate startDate, LocalDate endDate
+    public Map<LocalDate, BigDecimal> returnsCompoundedDaily(
+            Portfolio portfolio, LocalDate startDate, LocalDate endDate, String apiKey
     ) throws IOException {
 
-        double portfolioValue = portfolio.getInitialValue();
-        Map<String, Double> allocations = portfolio.getAllocations();
+        BigDecimal portfolioValue = portfolio.getInitialValue();
+        Map<String, BigDecimal> allocations = portfolio.getAllocations();
 
         Map<String, Map<LocalDate, TimeSeriesData>> assetPrices = new HashMap<>();
         for (String symbol : allocations.keySet()) {
-            Map<LocalDate, TimeSeriesData> data = client.getTimeSeriesResult(symbol).getTimeSeries();
+            Map<LocalDate, TimeSeriesData> data = client.getTimeSeriesResult(symbol, apiKey).getTimeSeries();
             assetPrices.put(symbol, data);
         }
 
@@ -47,7 +49,7 @@ public class BacktestService {
         // then a DateTime exception will be thrown by the date seeking functions
         Set<LocalDate> validDates = assetPrices.entrySet().iterator().next().getValue().keySet();
 
-        Map<LocalDate, Double> portfolioValueOverTime = new TreeMap<>();
+        Map<LocalDate, BigDecimal> portfolioValueOverTime = new TreeMap<>();
 
         // TODO: assumes startDate is valid, if not then seek next!
         if (!validDates.contains(startDate)) {
@@ -65,23 +67,22 @@ public class BacktestService {
             // TODO: weekends?
             //Date prevDate = DateUtil.asDate(date.minusDays(1));
             LocalDate prevDate = seekPreviousValidDate(date, validDates);
-            double prevValue = portfolioValueOverTime.get(prevDate);
-            double currValue = 0;
-            for (Map.Entry<String, Double> allocation : allocations.entrySet()) {
+            BigDecimal prevValue = portfolioValueOverTime.get(prevDate);
+            BigDecimal currValue = new BigDecimal(0);
+            for (Map.Entry<String, BigDecimal> allocation : allocations.entrySet()) {
 
-                double allocationValue = prevValue * allocation.getValue();
-                if (allocationValue == 0) {
+                BigDecimal allocationValue = prevValue.multiply(allocation.getValue());
+                if (allocationValue.compareTo(BigDecimal.ZERO) == 0) {
                     continue;
                 }
                 String symbol = allocation.getKey();
-                double pricePrev = getOHLCAverage(assetPrices.get(symbol).get(prevDate));
-                double priceCurr = getOHLCAverage(assetPrices.get(symbol).get(date));
+                BigDecimal pricePrev = getOHLCAverage(assetPrices.get(symbol).get(prevDate));
+                BigDecimal priceCurr = getOHLCAverage(assetPrices.get(symbol).get(date));
 
-                double rateOfReturn = (priceCurr / pricePrev) - 1;
-
-                currValue += allocationValue * (1 + rateOfReturn);
+                currValue = currValue.add(
+                        allocationValue.multiply(priceCurr)
+                                .divide(pricePrev, RoundingMode.HALF_UP));
             }
-            // again, LocalDateTime or date?
             portfolioValueOverTime.put(date, currValue);
         }
         return portfolioValueOverTime;
@@ -93,24 +94,23 @@ public class BacktestService {
      * @param prices TimeSeriesData representing prices in a period.
      * @return the OHLC average.
      */
-    public double getOHLCAverage(TimeSeriesData prices) {
-        // Calculating mean in Java :)
-        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
-        stats.accept(prices.getOpen());
-        stats.accept(prices.getHigh());
-        stats.accept(prices.getLow());
-        stats.accept(prices.getClose());
-
-        return stats.getAverage();
+    public BigDecimal getOHLCAverage(TimeSeriesData prices) {
+        // Calculating mean of BigDecimals in Java :)
+        BigDecimal sum = new BigDecimal(0);
+        sum = sum.add(prices.getOpen());
+        sum = sum.add(prices.getHigh());
+        sum = sum.add(prices.getLow());
+        sum = sum.add(prices.getClose());
+        return sum.divide(new BigDecimal(4), RoundingMode.HALF_UP);
     }
 
-    public Map<LocalDate, List<Double>> returnsCompoundedDaily(
-            List<Portfolio> portfolios, LocalDate start, LocalDate end
+    public Map<LocalDate, List<BigDecimal>> returnsCompoundedDaily(
+            List<Portfolio> portfolios, LocalDate start, LocalDate end, String apiKey
     ) throws IOException {
 
-        List<Map<LocalDate, Double>> list = new ArrayList<>();
+        List<Map<LocalDate, BigDecimal>> list = new ArrayList<>();
         for (Portfolio portfolio : portfolios) {
-            Map<LocalDate, Double> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end);
+            Map<LocalDate, BigDecimal> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end, apiKey);
             list.add(dateDoubleMap);
         }
         //System.out.println(list);
@@ -118,23 +118,23 @@ public class BacktestService {
         //Map<Date, Double>[] returns = (DateDoubleMap[]) list.toArray();
         // reflection! Apparently this is the modern way to convert a List into an array
         //Portfolio[] args = portfolios.toArray(new Portfolio[0]);
-        Map<LocalDate, List<Double>> resultMap = list.stream()
+        Map<LocalDate, List<BigDecimal>> resultMap = list.stream()
                 .flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         (entry) -> {
-                            List<Double> doubleList = new ArrayList<>();
-                            doubleList.add(entry.getValue());
-                            return doubleList;
+                            List<BigDecimal> bdList= new ArrayList<>();
+                            bdList.add(entry.getValue());
+                            return bdList;
                         },
                         (val1, val2) -> {
-                            List<Double> newList = new ArrayList<>(val1);
+                            List<BigDecimal> newList = new ArrayList<>(val1);
                             newList.addAll(val2);
                             return newList;
                         })
                 );
         // this is one way to sort a map by keys...
-        Map<LocalDate, List<Double>> sortedMap = new TreeMap<>(resultMap);
+        Map<LocalDate, List<BigDecimal>> sortedMap = new TreeMap<>(resultMap);
         return sortedMap;
     }
 

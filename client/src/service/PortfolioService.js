@@ -1,30 +1,32 @@
 import axios from "axios";
+import { PORTVIS_API_URL } from "../constants";
+
+const portfolio_endpoint = `${PORTVIS_API_URL}/portfolios/`;
 
 class PortfolioService {
-  // TODO: make localhost url generic
-  // TODO: trailing forward slash in the URL?
+
   getAllPortfolios() {
-    return axios.get(`http://127.0.0.1:8080/portfolios/`);
+    return axios.get(portfolio_endpoint);
   }
 
   getPortfolioById(portfolioId) {
-    return axios.get(`http://127.0.0.1:8080/portfolios/${portfolioId}`);
+    return axios.get(`${portfolio_endpoint}${portfolioId}`);
   }
 
   updatePortfolio(portfolioId, portfolio) {
-    return axios.put(`http://127.0.0.1:8080/portfolios/${portfolioId}`, portfolio);
+    return axios.put(`${portfolio_endpoint}${portfolioId}`, portfolio);
   }
 
   deletePortfolio(portfolioId) {
-    return axios.delete(`http://127.0.0.1:8080/portfolios/${portfolioId}`);
+    return axios.delete(`${portfolio_endpoint}${portfolioId}`);
   }
 
   addPortfolio(portfolio) {
-    return axios.post(`http://127.0.0.1:8080/portfolios/`, portfolio);
+    return axios.post(`${portfolio_endpoint}`, portfolio);
   }
 
   deleteAllPortfolios() {
-    return axios.delete(`http://127.0.0.1:8080/portfolios/`);
+    return axios.delete(`${portfolio_endpoint}`);
   }
 }
 

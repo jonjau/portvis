@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
@@ -21,11 +22,12 @@ public class JsonParser {
     }
 
     public static <T> void addDeserializer(Class<T> deserializationClass,
-            JsonDeserializer<T> deserializer) {
+                                           JsonDeserializer<T> deserializer) {
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addDeserializer(deserializationClass, deserializer);
         JSON_PARSER.registerModule(simpleModule);
     }
 
-    private static final ObjectMapper JSON_PARSER = new ObjectMapper();
+    private static final ObjectMapper JSON_PARSER = new
+        ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
 }

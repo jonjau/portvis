@@ -9,6 +9,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.Period;
@@ -50,12 +51,12 @@ class PortvisApplicationTests {
 
         portfolio.setName("test1");
 
-        double initialValue = 100.0;
+        BigDecimal initialValue = new BigDecimal(100);
         portfolio.setInitialValue(initialValue);
 
-        Map<String, Double> allocations = new HashMap<>();
-        allocations.put("MSFT", 0.5);
-        allocations.put("AAPL", 0.5);
+        Map<String, BigDecimal> allocations = new HashMap<>();
+        allocations.put("MSFT", new BigDecimal("0.5"));
+        allocations.put("AAPL", new BigDecimal("0.5"));
         portfolio.setAllocations(allocations);
 
         // TODO: can this be refactored? It's repeated in every test
@@ -127,7 +128,7 @@ class PortvisApplicationTests {
 
         // update some of that portfolio's fields
         String name = "pf2";
-        double initialValue = 123.4;
+        BigDecimal initialValue = new BigDecimal("123.4");
         portfolio.setName(name);
         portfolio.setInitialValue(initialValue);
 
@@ -161,17 +162,18 @@ class PortvisApplicationTests {
                 .host("localhost").port(getPort()).path("/backtest/")
                 .queryParam("start",startDate)
                 .queryParam("end", endDate)
-                .queryParam("id", id).build().toUri();
+                .queryParam("id", id)
+                .queryParam("apiKey", "testtestest").build().toUri();
 
         // this is one way to get a class reference to a parameterized type...
         @SuppressWarnings("unchecked")
-        Class<Map<LocalDate, List<Double>>> classRef =
-                (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
+        Class<Map<LocalDate, List<BigDecimal>>> classRef =
+                (Class<Map<LocalDate, List<BigDecimal>>>) (Class<?>) Map.class;
 
         // query (GET) the backtest service for the portfolio performance
-        ResponseEntity<Map<LocalDate, List<Double>>> getResponse =
+        ResponseEntity<Map<LocalDate, List<BigDecimal>>> getResponse =
                 restTemplate.getForEntity(uri, classRef);
-        Map<LocalDate, List<Double>> returns = getResponse.getBody();
+        Map<LocalDate, List<BigDecimal>> returns = getResponse.getBody();
 
         // check that the returned returns are present and correct, then delete to clean up
         assertNotNull(returns);
@@ -200,15 +202,16 @@ class PortvisApplicationTests {
                 .queryParam("start",startDate)
                 .queryParam("end", endDate)
                 .queryParam("id", id1)
-                .queryParam("id", id2).build().toUri();
+                .queryParam("id", id2)
+                .queryParam("apiKey", "testtesttest").build().toUri();
 
         @SuppressWarnings("unchecked")
-        Class<Map<LocalDate, List<Double>>> classRef =
-                (Class<Map<LocalDate, List<Double>>>) (Class<?>) Map.class;
+        Class<Map<LocalDate, List<BigDecimal>>> classRef =
+                (Class<Map<LocalDate, List<BigDecimal>>>) (Class<?>) Map.class;
 
-        ResponseEntity<Map<LocalDate, List<Double>>> getResponse =
+        ResponseEntity<Map<LocalDate, List<BigDecimal>>> getResponse =
                 restTemplate.getForEntity(uri, classRef);
-        Map<LocalDate, List<Double>> returns = getResponse.getBody();
+        Map<LocalDate, List<BigDecimal>> returns = getResponse.getBody();
 
         // add checking for accurate prices maybe?
         assertNotNull(returns);
