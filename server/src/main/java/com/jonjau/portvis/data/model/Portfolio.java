@@ -1,4 +1,4 @@
-package com.jonjau.portvis.data.models;
+package com.jonjau.portvis.data.model;
 
 import lombok.Data;
 
@@ -17,13 +17,14 @@ import java.util.TreeMap;
 public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
 
     @Size(max=255, message = "Portfolio name must be between 0 and 255 characters.")
     private String name;
 
     @Min(value=0, message="Portfolio initial value must be between 0 and 1 billion.")
     @Max(value=1_000_000_000, message="Portfolio initial value must be between 0 and 1 billion.")
+    // INITIALVALUE IS STILL DOUBLE IN DATABASE
     private BigDecimal initialValue;
 
     @ElementCollection

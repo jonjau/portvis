@@ -2,7 +2,7 @@ package com.jonjau.portvis.api;
 
 import com.jonjau.portvis.backtest.BacktestService;
 import com.jonjau.portvis.data.PortfolioRepository;
-import com.jonjau.portvis.data.models.Portfolio;
+import com.jonjau.portvis.data.model.Portfolio;
 import com.jonjau.portvis.utils.DeserializerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

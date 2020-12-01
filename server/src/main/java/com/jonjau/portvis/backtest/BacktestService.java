@@ -1,7 +1,7 @@
 package com.jonjau.portvis.backtest;
 
 import com.jonjau.portvis.AlphaVantageClient;
-import com.jonjau.portvis.data.models.Portfolio;
+import com.jonjau.portvis.data.model.Portfolio;
 import com.jonjau.portvis.timeseries.TimeSeriesData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.jonjau.portvis.api;
 
 import com.jonjau.portvis.data.PortfolioRepository;
-import com.jonjau.portvis.data.models.Portfolio;
+import com.jonjau.portvis.data.model.Portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
