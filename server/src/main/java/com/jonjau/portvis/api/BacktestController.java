@@ -27,6 +27,7 @@ public class BacktestController {
         this.backtestService = backtestService;
     }
 
+    // TODO: trailing backslash
     @GetMapping(value = "/backtest", params = {"id", "start", "end", "apiKey"})
     public Map<LocalDate, List<BigDecimal>> getReturns(
             @RequestParam("id") List<Long> portfolioIds,

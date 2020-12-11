@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @CrossOrigin
 public class JwtAuthenticationController {
@@ -32,12 +35,21 @@ public class JwtAuthenticationController {
 
     @PostMapping(value = "/authenticate/")
     public ResponseEntity<?> createAuthenticationToken(
-            @RequestBody JwtRequest authenticationRequest) throws Exception {
+            @RequestBody JwtRequest authenticationRequest, HttpServletResponse response) throws Exception {
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = userDetailsService.loadUserByUsername(
                 authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
+        Cookie cookie = new Cookie("accessToken", token);
+        // TODO: cookie.setSecure(true);
+        // Delete cookie after 5 hours, to match JWT expiry.
+        cookie.setMaxAge(5*60*60);
+        // Prevent XSS, and make it global (accessible everywhere)
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
