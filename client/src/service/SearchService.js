@@ -2,6 +2,8 @@ import axios from "axios";
 import { PORTVIS_API_URL } from "../constants";
 import PortvisApp from "../components/PortvisApp";
 
+const axiosInstance = axios.create({withCredentials: true});
+
 class SearchService {
   getSymbols(keywords) {
     // URL encoding of multiple IDs: id:[4,5] -> id=4%2C5 ("," becomes %2C)
@@ -12,7 +14,7 @@ class SearchService {
       apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
-    return axios.get(url);
+    return axiosInstance.get(url);
   }
 
   getCompany(symbol) {
@@ -21,7 +23,7 @@ class SearchService {
       apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
-    return axios.get(url);
+    return axiosInstance.get(url);
   }
 }
 

@@ -2,6 +2,8 @@ import axios from "axios";
 import { PORTVIS_API_URL } from "../constants";
 import PortvisApp from "../components/PortvisApp";
 
+const axiosInstance = axios.create({withCredentials: true});
+
 class BacktestService {
   getReturns(portfolioIds, startDate, endDate) {
     // URL encoding of multiple IDs: id:[4,5] -> id=4%2C5 ("," becomes %2C)
@@ -14,7 +16,7 @@ class BacktestService {
       apiKey: PortvisApp.apiKey,
     });
     const url = `${PORTVIS_API_URL}/backtest?${params.toString()}`;
-    return axios.get(url);
+    return axiosInstance.get(url);
   }
 }
 

@@ -98,7 +98,6 @@ class PortfolioComponent extends Component {
   }
 
   componentDidMount() {
-    console.log("portfolio component did mount")
     this.refreshPortfolios();
   }
 
@@ -204,10 +203,12 @@ class PortfolioComponent extends Component {
 
   addPortfolioClicked() {
     const newPortfolio = {
+      username: this.props.username,
       name: "",
       initialValue: 100,
       allocations: { MSFT: 1.0 },
     };
+    console.log(this.props.username)
     console.log(`${this.props.match.path}`);
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
