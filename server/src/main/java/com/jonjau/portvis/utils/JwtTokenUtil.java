@@ -7,7 +7,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +18,17 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
+
+    // the name of the cookie that stores the JWT token in the client
+    @Value("${portvis.auth.accessTokenCookieName}")
+    public String accessTokenCookieName;
+
+
     /**
      * unit is milliseconds, so 5 hours
      */
-    public static final long JWT_TOKEN_VALIDITY_MILLIS =5*60*60*1000;
+//    public static final long JWT_TOKEN_VALIDITY_MILLIS =5*60*60*1000;
+    public static final long JWT_TOKEN_VALIDITY_MILLIS =2*60*1000;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -76,5 +86,25 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String getJwtFromRequestHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    public String getJwtFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (accessTokenCookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

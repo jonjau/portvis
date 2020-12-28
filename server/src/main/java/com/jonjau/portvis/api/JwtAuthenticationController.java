@@ -12,17 +12,18 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
+//@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class JwtAuthenticationController {
+
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -33,24 +34,36 @@ public class JwtAuthenticationController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @PostMapping(value = "/authenticate/")
+    @PostMapping(value = "/login/")
     public ResponseEntity<?> createAuthenticationToken(
-            @RequestBody JwtRequest authenticationRequest, HttpServletResponse response) throws Exception {
+            @RequestBody JwtRequest authenticationRequest,
+            HttpServletResponse response
+    ) throws Exception {
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = userDetailsService.loadUserByUsername(
                 authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
+
         Cookie cookie = new Cookie("accessToken", token);
-        // TODO: cookie.setSecure(true);
+        // FIXME: cookie.setSecure(true);
         // Delete cookie after 5 hours, to match JWT expiry.
-        cookie.setMaxAge(5*60*60);
         // Prevent XSS, and make it global (accessible everywhere)
-        cookie.setHttpOnly(true);
+//        cookie.setMaxAge(5*60*60);
+        cookie.setMaxAge(2*60);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
+        cookie.setDomain("");
         response.addCookie(cookie);
 
         return ResponseEntity.ok(new JwtResponse(token));
+    }
+
+    @GetMapping(value = "/authenticate/")
+    public ResponseEntity<?> isAuthenticated(@RequestAttribute(name = "username") String username) {
+        Map<String, String> jsonMap = new HashMap<>();
+        jsonMap.put("username", username);
+        return ResponseEntity.ok(jsonMap);
     }
 
     @PostMapping(value = "/register/")
