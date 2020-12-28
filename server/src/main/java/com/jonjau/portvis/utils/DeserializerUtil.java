@@ -27,7 +27,7 @@ public final class DeserializerUtil {
 
     /**
      * @param jsonNode
-     * @return TODO: JAVADOCS
+     * @return TODO: JAVADOCS, make all the classes final...
      */
     public static Map<String, Object> sanitizeNodeKeys(JsonNode jsonNode) {
         Map<String, Object> sanitizedNodes = new HashMap<>();

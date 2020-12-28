@@ -3,30 +3,32 @@ import { PORTVIS_API_URL } from "../constants";
 
 const portfolio_endpoint = `${PORTVIS_API_URL}/portfolios/`;
 
+const instance = axios.create({withCredentials: true});
+
 class PortfolioService {
 
   getAllPortfolios() {
-    return axios.get(portfolio_endpoint);
+    return instance.get(portfolio_endpoint);
   }
 
   getPortfolioById(portfolioId) {
-    return axios.get(`${portfolio_endpoint}${portfolioId}`);
+    return instance.get(`${portfolio_endpoint}${portfolioId}`);
   }
 
   updatePortfolio(portfolioId, portfolio) {
-    return axios.put(`${portfolio_endpoint}${portfolioId}`, portfolio);
+    return instance.put(`${portfolio_endpoint}${portfolioId}`, portfolio);
   }
 
   deletePortfolio(portfolioId) {
-    return axios.delete(`${portfolio_endpoint}${portfolioId}`);
+    return instance.delete(`${portfolio_endpoint}${portfolioId}`);
   }
 
   addPortfolio(portfolio) {
-    return axios.post(`${portfolio_endpoint}`, portfolio);
+    return instance.post(`${portfolio_endpoint}`, portfolio);
   }
 
   deleteAllPortfolios() {
-    return axios.delete(`${portfolio_endpoint}`);
+    return instance.delete(`${portfolio_endpoint}`);
   }
 }
 

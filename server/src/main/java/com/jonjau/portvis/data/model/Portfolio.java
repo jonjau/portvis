@@ -1,4 +1,4 @@
-package com.jonjau.portvis.data.models;
+package com.jonjau.portvis.data.model;
 
 import lombok.Data;
 
@@ -16,8 +16,14 @@ import java.util.TreeMap;
 @Table(name="PORTFOLIO")
 public class Portfolio {
     @Id
+    @Column(name = "portfolio_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
+
+    // Portfolio is the "owning" entity, not User.
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Size(max=255, message = "Portfolio name must be between 0 and 255 characters.")
     private String name;

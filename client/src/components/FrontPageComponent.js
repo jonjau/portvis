@@ -8,7 +8,7 @@ function FrontPageComponent() {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="vertical-center">
-        <Jumbotron className="text-center">
+        <Jumbotron className="col-lg-10 offset-1 float-md-center text-center">
           <h1>What if I had X dollars in stocks Y and Z from dates A to B?</h1>
           <hr></hr>
           <p>
