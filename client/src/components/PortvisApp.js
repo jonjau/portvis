@@ -3,12 +3,14 @@ import {
   BrowserRouter as Router,
   Redirect,
   Route,
-  Switch
-} from"react-router-dom";
+  Switch,
+} from "react-router-dom";
+
+import { Row, Container, Jumbotron, Spinner } from "react-bootstrap";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import RegisterComponent from "./RegisterComponent";
+import LoginComponent from "./LoginComponent";
 import StockComponent from "./StockComponent";
 import BacktestComponent from "./BacktestComponent";
 import PortfolioComponent from "./PortfolioComponent";
@@ -38,21 +40,44 @@ import { useEffect } from "react";
 //   }
 // }
 
-function PrivateRoute({...props}) {
+const LoadingPage = () => (
+  <Row className="bg-secondary min-vh-100">
+    <Container className="vertical-center">
+      <Jumbotron className="col-4 offset-4 mx-auto text-center">
+        <Spinner animation="border" />
+      </Jumbotron>
+    </Container>
+  </Row>
+);
 
+const ErrorPage = () => (
+  <Row className="bg-secondary min-vh-100">
+    <Container className="vertical-center">
+      <Jumbotron className="col-6 offset-3 mx-auto text-center">
+        <h1>404: Page not found.</h1>
+      </Jumbotron>
+    </Container>
+  </Row>
+);
+
+function PrivateRoute({ ...props }) {
   useEffect(() => {
-    LoginService.isLoggedIn().then(response => {
+    LoginService.isLoggedIn()
+      .then((response) => {
         console.log("checked login");
-        props.setUsername(response.data.username)
+        props.setUsername(response.data.username);
         props.setIsLoggedIn(true);
-    }).catch(e => console.log(e));
+      })
+      .catch(() => props.setIsLoggedIn(false));
   }, [props]);
 
-  return props.isLoggedIn === null
-    ? <h1>wait</h1>
-    : props.isLoggedIn
-      ? <Route {...props}/>
-      : <Redirect to="/login/"/>
+  return props.isLoggedIn === null ? (
+    <LoadingPage />
+  ) : props.isLoggedIn ? (
+    <Route {...props} />
+  ) : (
+    <Redirect to="/login/" />
+  );
 }
 
 function PortvisApp() {
@@ -80,7 +105,7 @@ function PortvisApp() {
           <Switch>
             {/* some paths DON'T have to be exact in this case */}
             <Route path="/" exact component={FrontPageComponent} />
-            <Route path="/login/" component={RegisterComponent} />
+            <Route path="/login/" component={LoginComponent} />
             <PrivateRoute
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
@@ -98,7 +123,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/backtest/"
               render={(props) => (
-                <BacktestComponent username={username} {...props}/>
+                <BacktestComponent username={username} {...props} />
               )}
               // {/* component={BacktestComponent} */}
             />
@@ -109,7 +134,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/portfolios/"
               render={(props) => (
-                <PortfolioComponent username={username} {...props}/>
+                <PortfolioComponent username={username} {...props} />
               )}
               // {/* component={PortfolioComponent} */}
             />
@@ -129,15 +154,17 @@ function PortvisApp() {
               )}
             />
             <Route
-              render={() => (
-                <h2 className="text-center">404: Page not found.</h2>
-              )}
+              component={ErrorPage}
             />
           </Switch>
         </div>
         <footer className="bg-dark text-center">
-          <a className="text-white" href="https://github.com/jonjau/portvis"
-             target="_blank"  rel="noopener noreferrer">
+          <a
+            className="text-white"
+            href="https://github.com/jonjau/portvis"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             source code
           </a>
         </footer>
