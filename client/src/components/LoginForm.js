@@ -29,8 +29,6 @@ function LoginForm(props) {
         .max(255, "Must be between 1 to 255 characters"),
     }),
 
-    // TODO: Bootstrap Modal instead of plain alert
-    // TODO: redirect to portfolios/
     onSubmit: (values) => {
       if (values.isRegister) {
         props.register({

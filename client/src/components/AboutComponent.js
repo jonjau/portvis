@@ -1,7 +1,7 @@
 import React from "react";
-import { Row, Container, InputGroup, Form, Col } from "react-bootstrap";
+import { Row, Container } from "react-bootstrap";
 
-function AboutComponent(props) {
+function AboutComponent() {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="bg-light min-vh-100">
@@ -24,29 +24,6 @@ function AboutComponent(props) {
               &nbsp;portfoliovisualizer.com
             </a>
             .
-          </div>
-          <div>
-          <hr></hr>
-          </div>
-          <div className="mt-3">
-            The current AlphaVantage API key (edit if necessary):
-            <Form.Group as={Row}>
-            <Col md="5">
-              <InputGroup className="mr-sm-2">
-                <Form.Control
-                  id="inputPortfolioName"
-                  name="portfolioName"
-                  onChange={(event) => props.setApiKey(event.target.value)}
-                  value={props.apiKey}
-                />
-              </InputGroup>
-            </Col>
-            </Form.Group>
-            Get one
-            <a href="https://www.alphavantage.co/support/#api-key">
-              &nbsp;here
-            </a>
-            , or maybe try some random letters and numbers...
           </div>
         </Container>
       </Container>

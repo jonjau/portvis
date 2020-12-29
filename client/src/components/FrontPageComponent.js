@@ -1,10 +1,8 @@
 import React from "react";
 import { Row, Jumbotron, Button, Container } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
 import "../App.css";
 
-function FrontPageComponent() {
-  const history = useHistory();
+function FrontPageComponent(props) {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="vertical-center">
@@ -14,7 +12,7 @@ function FrontPageComponent() {
           <p>
             <Button
               variant="info btn-lg"
-              onClick={() => history.push("/portfolios/")}
+              onClick={() => props.history.push("/portfolios/")}
             >
               Good question...
             </Button>

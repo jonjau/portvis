@@ -7,7 +7,6 @@ import StockSearch from "./StockSearch";
 function NavigationBar(props) {
 
   return (
-    // TODO: disable navbar when not logged in?
     <Navbar sticky="top" bg="dark" variant="dark">
       <LinkContainer to="/">
         <Navbar.Brand>Portvis</Navbar.Brand>
@@ -22,7 +21,7 @@ function NavigationBar(props) {
         <LinkContainer to="/stocks/">
           <Nav.Link>Stocks</Nav.Link>
         </LinkContainer>
-        <LinkContainer to="/login/">
+        <LinkContainer to="/account/">
           <Nav.Link>Account</Nav.Link>
         </LinkContainer>
         <LinkContainer to="/about/">

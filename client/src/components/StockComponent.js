@@ -23,16 +23,16 @@ function StockComponent(props) {
                 <div>{stock.Description}</div>
               </>
             ) : (
-              <h5 className="text-muted text-center">
+              <h4 className="text-muted text-center">
                 No information found for this stock.
-              </h5>
+              </h4>
             )}
           </Container>
         ) : (
           <Container className="m-2">
-            <h5 className="text-muted text-center">
+            <h4 className="text-muted text-center">
               Search for a stock in the search bar...
-            </h5>
+            </h4>
           </Container>
         )}
       </Container>

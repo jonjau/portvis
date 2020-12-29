@@ -23,22 +23,7 @@ import FrontPageComponent from "./FrontPageComponent";
 
 import { ALPHAVANTAGE_API_KEY } from "../constants";
 import { useEffect } from "react";
-
-// class PrivateRoute extends Component {
-//   constructor(props) {
-//     super();
-//   }
-
-//   componentDidUpdate() {
-//     LoginService.isLoggedIn().then((response) => {
-//       console.log(response);
-//     }).catch((e) => console.log(e));
-//   }
-
-//   render() {
-//     return true ? <Route {...this.props}/> : <Redirect to="/login/"/>
-//   }
-// }
+import AccountComponent from "./AccountComponent";
 
 const LoadingPage = () => (
   <Row className="bg-secondary min-vh-100">
@@ -111,10 +96,11 @@ function PortvisApp() {
               setIsLoggedIn={setIsLoggedIn}
               username={username}
               setUsername={setUsername}
-              path="/stocks/"
+              path="/portfolios/"
               render={(props) => (
-                <StockComponent searchedStock={searchedStock} {...props} />
+                <PortfolioComponent username={username} {...props} />
               )}
+              // {/* component={PortfolioComponent} */}
             />
             <PrivateRoute
               isLoggedIn={isLoggedIn}
@@ -132,11 +118,25 @@ function PortvisApp() {
               setIsLoggedIn={setIsLoggedIn}
               username={username}
               setUsername={setUsername}
-              path="/portfolios/"
+              path="/stocks/"
               render={(props) => (
-                <PortfolioComponent username={username} {...props} />
+                <StockComponent searchedStock={searchedStock} {...props} />
               )}
-              // {/* component={PortfolioComponent} */}
+            />
+            <PrivateRoute
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+              username={username}
+              setUsername={setUsername}
+              path="/account/"
+              render={(props) => (
+                <AccountComponent
+                  setApiKey={setApiKey}
+                  apiKey={apiKey}
+                  username={username}
+                  {...props}
+                />
+              )}
             />
             <PrivateRoute
               isLoggedIn={isLoggedIn}
@@ -146,8 +146,6 @@ function PortvisApp() {
               path="/about/"
               render={(props) => (
                 <AboutComponent
-                  setApiKey={setApiKey}
-                  apiKey={apiKey}
                   username={username}
                   {...props}
                 />
