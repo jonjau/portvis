@@ -34,22 +34,36 @@ public class PortfolioController {
         this.userRepository = userRepo;
     }
 
+    private List<Portfolio> getPortfoliosOfUser(String username) {
+        User user = userRepository.findByUsername(username);
+        return portfolioRepository.findAllByUser(user);
+    }
+
+    private Portfolio getPortfolioOfUser(String username, long portfolioId) throws Exception {
+        return getPortfoliosOfUser(username)
+                .stream()
+                .filter(p -> p.getId() == portfolioId)
+                .findFirst()
+                .orElseThrow(() -> new Exception(
+                        "Portfolio with ID " + portfolioId +" of user " + username +
+                        " not found."));
+    }
+
     // trailing slash "/", stay consistent
     @GetMapping("/portfolios/")
     public List<Portfolio> getAllPortfolios(
             @RequestAttribute(name = "username") String username
     ) {
-        User user = userRepository.findByUsername(username);
-        return portfolioRepository.findAllByUser(user);
+        return getPortfoliosOfUser(username);
     }
 
     @GetMapping("/portfolios/{id}")
     public ResponseEntity<Portfolio> getPortfolioById(
-            @PathVariable(value = "id") Long portfolioId
+            @PathVariable(value = "id") Long portfolioId,
+            @RequestAttribute(name = "username") String username
     ) throws Exception {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new Exception(
-                        "Portfolio with ID " + portfolioId + " not found."));
+
+        Portfolio portfolio = getPortfolioOfUser(username, portfolioId);
         return ResponseEntity.ok().body(portfolio);
     }
 
@@ -61,7 +75,7 @@ public class PortfolioController {
         User user = userRepository.findByUsername(username);
         portfolio.setUser(user);
 
-        // FIXME: ugly check
+        // FIXME: ugly check, should be in Portfolio's constructor / factory method...
         BigDecimal sum = new BigDecimal(0);
         for (BigDecimal d : portfolio.getAllocations().values()) {
             sum = sum.add(d);
@@ -76,11 +90,11 @@ public class PortfolioController {
     @PutMapping("/portfolios/{id}")
     public ResponseEntity<Portfolio> updatePortfolio(
             @PathVariable(value = "id") Long portfolioId,
-            @Valid @RequestBody Portfolio portfolioDetails
+            @Valid @RequestBody Portfolio portfolioDetails,
+            @RequestAttribute(name = "username") String username
     ) throws Exception {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new Exception(
-                        "Portfolio with ID " + portfolioId + " not found."));
+
+        Portfolio portfolio = getPortfolioOfUser(username, portfolioId);
 
         BigDecimal sum = new BigDecimal(0);
         for (BigDecimal d : portfolio.getAllocations().values()) {
@@ -102,13 +116,12 @@ public class PortfolioController {
 
     @DeleteMapping("/portfolios/{id}")
     public Map<String, Boolean> deletePortfolio(
-            @PathVariable(value = "id") Long portfolioId
+            @PathVariable(value = "id") Long portfolioId,
+            @RequestAttribute(name = "username") String username
     ) throws Exception {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new Exception(
-                        "Portfolio with ID " + portfolioId + " not found."));
-
+        Portfolio portfolio = getPortfolioOfUser(username, portfolioId);
         portfolioRepository.delete(portfolio);
+
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
 
@@ -116,8 +129,11 @@ public class PortfolioController {
     }
 
     @DeleteMapping("/portfolios/")
-    public Map<String, Boolean> deleteAllPortfolios() {
-        portfolioRepository.deleteAll();
+    public Map<String, Boolean> deleteAllPortfolios(
+            @RequestAttribute(name = "username") String username
+    ) {
+        List<Portfolio> portfolios = getPortfoliosOfUser(username);
+        portfolioRepository.deleteAll(portfolios);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
