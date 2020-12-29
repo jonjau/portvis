@@ -8,7 +8,7 @@
         <listeners>
             <listener>
                 <!-- Add the logger class to listen to caching events -->
-                <class>com.jonjau.portvis.config.CacheLogger</class>
+                <class>com.jonjau.portvis.cache.CacheLogger</class>
                 <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
                 <event-ordering-mode>UNORDERED</event-ordering-mode>
                 <events-to-fire-on>CREATED</events-to-fire-on>
@@ -31,7 +31,7 @@
 
     <cache alias="timeSeriesResults" uses-template="default">
         <key-type>java.lang.String</key-type>
-        <value-type>com.jonjau.portvis.timeseries.TimeSeriesResult</value-type>
+        <value-type>com.jonjau.portvis.alphavantage.dto.TimeSeriesResult</value-type>
 
         <expiry>
             <!--

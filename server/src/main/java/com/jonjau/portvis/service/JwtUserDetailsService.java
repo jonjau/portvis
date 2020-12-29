@@ -1,8 +1,8 @@
 package com.jonjau.portvis.service;
 
-import com.jonjau.portvis.data.UserRepository;
-import com.jonjau.portvis.data.model.User;
-import com.jonjau.portvis.data.model.UserDto;
+import com.jonjau.portvis.repository.UserRepository;
+import com.jonjau.portvis.repository.entity.User;
+import com.jonjau.portvis.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

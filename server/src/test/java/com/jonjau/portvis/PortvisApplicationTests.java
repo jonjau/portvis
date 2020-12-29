@@ -1,6 +1,6 @@
 package com.jonjau.portvis;
 
-import com.jonjau.portvis.data.model.Portfolio;
+import com.jonjau.portvis.repository.entity.Portfolio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

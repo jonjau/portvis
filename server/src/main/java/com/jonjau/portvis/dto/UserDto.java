@@ -1,0 +1,10 @@
+package com.jonjau.portvis.dto;
+
+import lombok.Data;
+
+@Data
+public class UserDto {
+    private String username;
+    private String password;
+}
+
