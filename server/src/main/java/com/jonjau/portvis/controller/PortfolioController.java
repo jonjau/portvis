@@ -4,7 +4,6 @@ import com.jonjau.portvis.dto.PortfolioDto;
 import com.jonjau.portvis.exception.PortfolioNotFoundException;
 import com.jonjau.portvis.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

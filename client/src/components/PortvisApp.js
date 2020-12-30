@@ -80,6 +80,8 @@ function PortvisApp() {
         console.log(`error: ${JSON.stringify(error, null, 2)}`)
       );
     // FIXME: if stock not found, need to fail: fix this in the back end
+    // FIXME: if stock not found, should not be able to add to portfolio:
+    // currently this raises a generic error when user backtests...
   }
 
   return (

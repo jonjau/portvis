@@ -1,6 +1,7 @@
 package com.jonjau.portvis;
 
 import com.jonjau.portvis.repository.entity.Portfolio;
+import com.jonjau.portvis.service.TimeSeriesService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -78,6 +79,11 @@ class PortvisApplicationTests {
     private void deletePortfolioById(Long id) {
         // DELETE the portfolio
         restTemplate.delete(getRootUrl() + "/portfolios/" + id);
+    }
+
+    @Test
+    public void testlorem() {
+
     }
 
     @Test

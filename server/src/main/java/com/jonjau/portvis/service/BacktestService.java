@@ -1,8 +1,9 @@
 package com.jonjau.portvis.service;
 
 import com.jonjau.portvis.alphavantage.AlphaVantageClient;
-import com.jonjau.portvis.repository.entity.Portfolio;
+import com.jonjau.portvis.dto.PortfolioDto;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
+import com.jonjau.portvis.exception.MissingPriceInformationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,31 +17,47 @@ import java.util.stream.Collectors;
 @Service
 public class BacktestService {
 
-    private final AlphaVantageClient client;
+    /**
+     * Duration to skip when seeking the closest trading day. Beyond this, exceptions will be
+     * thrown.
+     */
+    private static final Duration CLOSEST_TRADING_DAY_MARGIN = Duration.ofDays(40);
 
     /**
      * This class performs the analysis on the time series data. Therefore it requires the
-     * alphavantage client to receive data. An improvement would be to store the query results
-     * from alphavantage to not have to request every time.
-     * FIXME: never trust the client????
-     *
-     * @param client will be injected by Spring
+     * AlphaVantage client to receive data.
      */
+    private final AlphaVantageClient client;
+
     @Autowired
     public BacktestService(AlphaVantageClient client) {
         this.client = client;
     }
 
-    public Map<LocalDate, BigDecimal> returnsCompoundedDaily(
-            Portfolio portfolio, LocalDate startDate, LocalDate endDate, String apiKey
-    ) throws IOException {
+    /**
+     * Same as returnsCompoundedDaily for multiple portfolio, but this is for a single portfolio
+     *
+     * @param portfolio the Portfolio to calculate returns for
+     * @param startDate Date from which to start calculating returns
+     * @param endDate Date up to which (inclusive) returns will be calculated
+     * @param apiKey AlphaVantage ApiKey
+     * @return The value of the given portfolio over time from the start date to the end date
+     * @throws IOException if something goes wrong as stock prices are fetched
+     * @throws MissingPriceInformationException if there is a exceptional gap between dates where
+     *              there is price data available for at least on the stocks in the portfolio
+     */
+    private Map<LocalDate, BigDecimal> returnsCompoundedDaily(
+            PortfolioDto portfolio, LocalDate startDate, LocalDate endDate, String apiKey
+    ) throws IOException, MissingPriceInformationException {
 
         BigDecimal portfolioValue = portfolio.getInitialValue();
         Map<String, BigDecimal> allocations = portfolio.getAllocations();
 
+        // populate map, mapping each symbol to their prices over time.
         Map<String, Map<LocalDate, TimeSeriesData>> assetPrices = new HashMap<>();
         for (String symbol : allocations.keySet()) {
-            Map<LocalDate, TimeSeriesData> data = client.getTimeSeriesResult(symbol, apiKey).getTimeSeries();
+            Map<LocalDate, TimeSeriesData> data = client
+                    .getTimeSeriesResult(symbol, apiKey).getTimeSeries();
             assetPrices.put(symbol, data);
         }
 
@@ -51,7 +68,7 @@ public class BacktestService {
 
         Map<LocalDate, BigDecimal> portfolioValueOverTime = new TreeMap<>();
 
-        // TODO: assumes startDate is valid, if not then seek next!
+        // assume startDate is valid, if not then seek next date that is!
         if (!validDates.contains(startDate)) {
             startDate = seekNextValidDate(startDate, validDates);
         }
@@ -61,16 +78,19 @@ public class BacktestService {
             endDate = seekPreviousValidDate(endDate, validDates);
         }
 
+        // Would be great if we had operator overloading :')
         LocalDate date = seekNextValidDate(startDate, validDates);
         for (; date.isBefore(endDate) || date.isEqual(endDate);
              date = seekNextValidDate(date, validDates)) {
-            // TODO: weekends?
-            //Date prevDate = DateUtil.asDate(date.minusDays(1));
+
             LocalDate prevDate = seekPreviousValidDate(date, validDates);
             BigDecimal prevValue = portfolioValueOverTime.get(prevDate);
-            BigDecimal currValue = new BigDecimal(0);
+            BigDecimal currPortfolioValue = new BigDecimal(0);
+
             for (Map.Entry<String, BigDecimal> allocation : allocations.entrySet()) {
 
+                // Calculate how much money is allocated in the currently considered stock
+                // If this is zero, then skip calculation: it will not appreciate.
                 BigDecimal allocationValue = prevValue.multiply(allocation.getValue());
                 if (allocationValue.compareTo(BigDecimal.ZERO) == 0) {
                     continue;
@@ -79,23 +99,26 @@ public class BacktestService {
                 BigDecimal pricePrev = getOHLCAverage(assetPrices.get(symbol).get(prevDate));
                 BigDecimal priceCurr = getOHLCAverage(assetPrices.get(symbol).get(date));
 
-                currValue = currValue.add(
+                // This is currPortfolioValue +=
+                //  allocationvalue * current stock price / previous stock price
+                currPortfolioValue = currPortfolioValue.add(
                         allocationValue.multiply(priceCurr)
                                 .divide(pricePrev, RoundingMode.HALF_UP));
             }
-            portfolioValueOverTime.put(date, currValue);
+            portfolioValueOverTime.put(date, currPortfolioValue);
         }
         return portfolioValueOverTime;
     }
 
     /**
-     * Calculates the average of open, high, low, and close prices for a given period
+     * Calculates the average of open, high, low, and close prices for a given period, rounding
+     * half up.
      *
      * @param prices TimeSeriesData representing prices in a period.
      * @return the OHLC average.
      */
     public BigDecimal getOHLCAverage(TimeSeriesData prices) {
-        // Calculating mean of BigDecimals in Java :)
+        // Calculating mean of BigDecimals in Java...
         BigDecimal sum = new BigDecimal(0);
         sum = sum.add(prices.getOpen());
         sum = sum.add(prices.getHigh());
@@ -104,21 +127,36 @@ public class BacktestService {
         return sum.divide(new BigDecimal(4), RoundingMode.HALF_UP);
     }
 
+    /**
+     * Returns the values of portfolios over time, where returns are compounded daily and
+     * portfolios are rebalanced daily. If the start date does not have price information then the
+     * calculations will start at the next closest trading day. Likewise, if the end date does not
+     * have price information, then the calculations will end at the previous closest trading day.
+     *
+     * @param portfolios the Portfolios to calculate returns for
+     * @param startDate Date from which to start calculating returns
+     * @param endDate Date up to which (exclusive) returns will be calculated
+     * @param apiKey AlphaVantage ApiKey
+     * @return The value of the given portfolios over time from the start date to the end date
+     * @throws IOException if something goes wrong as stock prices are fetched
+     * @throws MissingPriceInformationException if there is a exceptional gap between dates where
+*              there is price data available for at least on the stocks in one of the portfolios.
+     */
     public Map<LocalDate, List<BigDecimal>> returnsCompoundedDaily(
-            List<Portfolio> portfolios, LocalDate start, LocalDate end, String apiKey
-    ) throws IOException {
+            List<PortfolioDto> portfolios, LocalDate startDate, LocalDate endDate, String apiKey
+    ) throws IOException, MissingPriceInformationException {
 
-        List<Map<LocalDate, BigDecimal>> list = new ArrayList<>();
-        for (Portfolio portfolio : portfolios) {
-            Map<LocalDate, BigDecimal> dateDoubleMap = returnsCompoundedDaily(portfolio, start, end, apiKey);
-            list.add(dateDoubleMap);
+        // Initialise list of backtest results, each item corresponds to a portfolio's returns
+        // over time (i.e. Map of Date and BigDecimal)
+        List<Map<LocalDate, BigDecimal>> backtestResults = new ArrayList<>();
+        for (PortfolioDto portfolio : portfolios) {
+            Map<LocalDate, BigDecimal> dateDoubleMap = returnsCompoundedDaily(
+                    portfolio, startDate, endDate, apiKey);
+            backtestResults.add(dateDoubleMap);
         }
-        //System.out.println(list);
-        //class DateDoubleMap extends HashMap<Date, Double> {}
-        //Map<Date, Double>[] returns = (DateDoubleMap[]) list.toArray();
-        // reflection! Apparently this is the modern way to convert a List into an array
-        //Portfolio[] args = portfolios.toArray(new Portfolio[0]);
-        Map<LocalDate, List<BigDecimal>> resultMap = list.stream()
+
+        // Combine it such that it becomes dates mapped to the current value of each portfolio
+        Map<LocalDate, List<BigDecimal>> resultMap = backtestResults.stream()
                 .flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -133,13 +171,16 @@ public class BacktestService {
                             return newList;
                         })
                 );
-        // this is one way to sort a map by keys...
-        Map<LocalDate, List<BigDecimal>> sortedMap = new TreeMap<>(resultMap);
-        return sortedMap;
+        // We need it to be chronological, and this is one way to sort a map by keys...
+        return new TreeMap<>(resultMap);
     }
 
-    public LocalDate seekNextValidDate(LocalDate dateTime, Set<LocalDate> validDates) {
-        int daysToSkip = 7;
+    private LocalDate seekNextValidDate(
+            LocalDate dateTime,
+            Set<LocalDate> validDates
+    ) throws MissingPriceInformationException {
+        long daysToSkip = CLOSEST_TRADING_DAY_MARGIN.toDays();
+
         if (dateTime.isBefore(LocalDate.now())) {
             for (int i = 1; i <= daysToSkip; i++) {
                 if (validDates.contains(dateTime.plusDays(i))) {
@@ -147,17 +188,14 @@ public class BacktestService {
                 }
             }
         }
-        throw new DateTimeException("No valid date within " + daysToSkip +
-                " days found after " + dateTime.toString());
+        throw new MissingPriceInformationException(dateTime, CLOSEST_TRADING_DAY_MARGIN);
     }
 
-    public boolean isWeekend(LocalDate datetime) {
-        DayOfWeek dow = datetime.getDayOfWeek();
-        return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
-    }
-
-    public LocalDate seekPreviousValidDate(LocalDate dateTime, Set<LocalDate> validDates) {
-        int daysToSkip = 7;
+    private LocalDate seekPreviousValidDate(
+            LocalDate dateTime,
+            Set<LocalDate> validDates
+    ) throws MissingPriceInformationException {
+        long daysToSkip = CLOSEST_TRADING_DAY_MARGIN.toDays();
 
         if (dateTime.isBefore(LocalDate.now())) {
             for (int i = 1; i <= daysToSkip; i++) {
@@ -166,7 +204,6 @@ public class BacktestService {
                 }
             }
         }
-        throw new DateTimeException("No valid date within " + daysToSkip +
-                " days found  before " + dateTime.toString());
+        throw new MissingPriceInformationException(dateTime, CLOSEST_TRADING_DAY_MARGIN);
     }
 }

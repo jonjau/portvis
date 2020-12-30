@@ -37,10 +37,6 @@ public class JwtTokenComponent {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    public Date getIssuedAtDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getIssuedAt);
-    }
-
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
@@ -65,7 +61,6 @@ public class JwtTokenComponent {
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        System.out.println(secret);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)

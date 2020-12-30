@@ -46,6 +46,15 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
+    @ExceptionHandler({MissingPriceInformationException.class})
+    public ResponseEntity<ApiErrorResponse> handle(MissingPriceInformationException exception) {
+        ApiErrorResponse response = ApiErrorResponse.create(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Missing price information.",
+                exception);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,

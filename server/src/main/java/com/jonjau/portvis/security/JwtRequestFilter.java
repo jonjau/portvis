@@ -42,7 +42,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         // In the case that you have a HandlerInterceptor, this filter gets run before that
         // interceptor, and only after that does the request go to the controllers
-        System.out.println("filter");
 
         // Get the JWT from the Cookie then get the username from that JWT then add it as a
         // request attribute so each handler knows who the current user is. There are probably
