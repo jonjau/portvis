@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class JwtTokenUtil {
+public class JwtTokenComponent {
 
     // the name of the cookie that stores the JWT token in the client
     @Value("${portvis.auth.accessTokenCookieName}")
@@ -59,11 +59,6 @@ public class JwtTokenUtil {
         return expiration.before(new Date());
     }
 
-    private Boolean ignoreTokenExpiration(String token) {
-        // here you specify tokens, for that the expiration is ignored
-        return false;
-    }
-
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, userDetails.getUsername());
@@ -77,10 +72,6 @@ public class JwtTokenUtil {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY_MILLIS))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
-    }
-
-    public Boolean canTokenBeRefreshed(String token) {
-        return (!isTokenExpired(token) || ignoreTokenExpiration(token));
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

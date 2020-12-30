@@ -1,10 +1,8 @@
 package com.jonjau.portvis.security;
 
 import com.jonjau.portvis.service.JwtUserDetailsService;
-import com.jonjau.portvis.util.JwtTokenUtil;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.jonjau.portvis.util.JwtTokenComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,14 +19,19 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    @Value("${portvis.auth.accessTokenCookieName}")
-    private String accessTokenCookieName;
-
-    @Autowired
+    private final JwtTokenComponent jwtTokenComponent;
     private JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    public JwtRequestFilter(JwtTokenComponent jwtTokenComponent) {
+        this.jwtTokenComponent = jwtTokenComponent;
+    }
+
+    // Setter injection to avoid circular dependencies
+    @Autowired
+    public void setJwtUserDetailsService(JwtUserDetailsService jwtUserDetailsService) {
+        this.jwtUserDetailsService = jwtUserDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -37,19 +40,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             FilterChain chain
     ) throws ServletException, IOException {
 
-//        final String requestTokenHeader = request.getHeader("Authorization");
+        // In the case that you have a HandlerInterceptor, this filter gets run before that
+        // interceptor, and only after that does the request go to the controllers
+        System.out.println("filter");
+
+        // Get the JWT from the Cookie then get the username from that JWT then add it as a
+        // request attribute so each handler knows who the current user is. There are probably
+        // better approaches than this.
         String username = null;
-        String jwtToken = jwtTokenUtil.getJwtFromCookie(request);
+        String jwtToken = jwtTokenComponent.getJwtFromCookie(request);
         if (jwtToken != null) {
-            try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Illegal JWT Token");
-            } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
-            }
-        } else {
-            logger.warn("Unable to get JWT Token");
+            // Assuming the cookie containing the JWT has not yet expired in the request,
+            // this code examining the JWT might throw IllegalArgumentException if JWT is
+            // illegal or ExpiredJwtException if the JWT (separate from the cookie) has expired
+            username = jwtTokenComponent.getUsernameFromToken(jwtToken);
+            request.setAttribute("username", username);
         }
 
         // Once we get the token validate it.
@@ -58,7 +63,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
             // if token is valid configure Spring Security to manually set authentication
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+            if (jwtTokenComponent.validateToken(jwtToken, userDetails)) {
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(

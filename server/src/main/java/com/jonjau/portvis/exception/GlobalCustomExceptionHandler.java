@@ -5,6 +5,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,6 +26,24 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
                 "Portfolio not found.",
                 exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({UserAlreadyExistsException.class})
+    public ResponseEntity<ApiErrorResponse> handle(UserAlreadyExistsException exception) {
+        ApiErrorResponse response = ApiErrorResponse.create(
+                HttpStatus.CONFLICT,
+                "Duplicate username.",
+                exception);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class})
+    public ResponseEntity<ApiErrorResponse> handle(BadCredentialsException exception) {
+        ApiErrorResponse response = ApiErrorResponse.create(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Incorrect username or password.",
+                exception);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
     @Override

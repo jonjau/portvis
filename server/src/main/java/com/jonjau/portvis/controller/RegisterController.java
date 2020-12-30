@@ -3,8 +3,10 @@ package com.jonjau.portvis.controller;
 import com.jonjau.portvis.dto.UserDto;
 import com.jonjau.portvis.exception.UserAlreadyExistsException;
 import com.jonjau.portvis.service.JwtUserDetailsService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/register/")
@@ -13,15 +15,16 @@ import org.springframework.web.bind.annotation.*;
 public class RegisterController {
 
     private final JwtUserDetailsService userDetailsService;
+
+    @Autowired
     public RegisterController(JwtUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
     @PostMapping
-    public ResponseEntity<?> saveUser(@RequestBody UserDto user) throws UserAlreadyExistsException {
-        if (userDetailsService.userExists(user.getUsername())) {
-            throw new UserAlreadyExistsException(user.getUsername());
-        }
-        return ResponseEntity.ok(userDetailsService.save(user));
+    public UserDto registerUser(
+            @Valid @RequestBody UserDto user
+    ) throws UserAlreadyExistsException {
+        return userDetailsService.registerUser(user);
     }
 }

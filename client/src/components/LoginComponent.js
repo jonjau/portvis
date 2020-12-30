@@ -19,6 +19,8 @@ function LoginComponent(props) {
         login(username, password);
       })
       .catch((error) => {
+        // FIXME: Failed login followed by failed register will permanently
+        // change the message: the failed login message does not appear again
         // TODO: assuming all errors mean "username already taken"...
         // error code 422 should be used for "duplicate username", instead of
         // 500

@@ -1,14 +1,16 @@
 package com.jonjau.portvis.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Set;
 
+@Data
 @Entity(name = "user")
 @Table(name = "USER")
 public class User {
-    //TODO: IDENTITY or AUTO?
+    // Identity means "autoincrement"
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -17,23 +19,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Portfolio> portfolios;
 
-    // TODO: have length constraints here too, as in the frontend
     @Column(unique = true)
     private String username;
 
     @JsonIgnore
     private String password;
-
-    public String getUsername() {
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

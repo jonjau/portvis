@@ -5,7 +5,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,8 +18,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException e
-    ) throws IOException, ServletException {
-
+    ) throws IOException {
+        // Reaching here means request has failed because of lack of authorization.
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 }

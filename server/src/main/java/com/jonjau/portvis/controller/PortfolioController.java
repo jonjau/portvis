@@ -19,8 +19,6 @@ import java.util.Map;
 @RestController
 public class PortfolioController {
 
-    @Value("${portvis.auth.accessTokenCookieName}")
-    private String accessTokenCookieName;
 
     private PortfolioService portfolioService;
 
