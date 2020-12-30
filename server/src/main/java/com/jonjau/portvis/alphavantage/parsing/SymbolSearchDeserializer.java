@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jonjau.portvis.alphavantage.dto.Symbol;
 import com.jonjau.portvis.alphavantage.dto.SymbolSearchResult;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class SymbolSearchDeserializer extends JsonDeserializer<SymbolSearchResult> {
 
     @Override
@@ -21,8 +23,8 @@ public class SymbolSearchDeserializer extends JsonDeserializer<SymbolSearchResul
         try {
             symbolSearchResult.setBestMatches( DeserializerUtil.getObjectList(node, Symbol.class));
         } catch (final Throwable throwable) {
-            System.out.println("Error when deserializing:");
-            System.out.println(node.toString());
+            log.error("Error when deserializing:");
+            log.error(node.toPrettyString());
             throwable.printStackTrace();
         }
         return symbolSearchResult;

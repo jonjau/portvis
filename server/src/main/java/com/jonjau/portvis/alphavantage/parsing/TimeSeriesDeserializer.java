@@ -8,11 +8,13 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesResult;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * TimeSeriesDailyDeserializer
  */
+@Slf4j
 public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
 
     @Override
@@ -28,8 +30,8 @@ public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
                 DeserializerUtil.getDateObjectMap(node, TimeSeriesData.class)
             );
         } catch (final Throwable throwable) {
-            System.out.println("Error when deserializing:");
-            System.out.println(node.toString());
+            log.error("Error when deserializing:");
+            log.error(node.toPrettyString());
             throwable.printStackTrace();
         }
         return timeSeriesResult;
