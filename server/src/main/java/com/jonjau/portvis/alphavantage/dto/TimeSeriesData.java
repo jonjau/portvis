@@ -1,17 +1,10 @@
 package com.jonjau.portvis.alphavantage.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-/**
- * TimeSeriesDaily
- */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class TimeSeriesData {
 
     private BigDecimal open;

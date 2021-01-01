@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+/**
+ * Component that wraps a ModelMapper, this is generated code.
+ */
 @Component
 public class ModelMapperComponent {
     private final ModelMapper modelMapper = new ModelMapper();

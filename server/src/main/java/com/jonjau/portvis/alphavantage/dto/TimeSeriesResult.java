@@ -7,9 +7,6 @@ import com.jonjau.portvis.alphavantage.dto.MetaData;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
 import lombok.Data;
 
-/**
- * TimeSeriesResult
- */
 @Data
 public class TimeSeriesResult {
 

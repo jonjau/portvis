@@ -1,7 +1,7 @@
 package com.jonjau.portvis.alphavantage.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 // ignore attributes/properties that have not been defined in this class
@@ -9,21 +9,22 @@ import lombok.Data;
 @Data
 public class Company {
 
-    @JsonProperty("Symbol")
+    // deserialize (input) either "Symbol" or "symbol", but serialize (output) always as "symbol"
+    @JsonAlias("Symbol")
     private String symbol;
 
-    @JsonProperty("AssetType")
+    @JsonAlias("AssetType")
     private String assetType;
 
-    @JsonProperty("Name")
+    @JsonAlias("Name")
     private String name;
 
-    @JsonProperty("Description")
+    @JsonAlias("Description")
     private String description;
 
-    @JsonProperty("Sector")
+    @JsonAlias("Sector")
     private String sector;
 
-    @JsonProperty("Industry")
+    @JsonAlias("Industry")
     private String industry;
 }

@@ -55,6 +55,7 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
+    // This one is meant to handle javax.validation constraint errors on the DTOs.
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,

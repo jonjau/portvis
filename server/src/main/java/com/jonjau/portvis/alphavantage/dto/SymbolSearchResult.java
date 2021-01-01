@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class SymbolSearchResult {
 
-    private List<Symbol> bestMatches;
+    private List<SymbolSearchResultItem> bestMatches;
 }

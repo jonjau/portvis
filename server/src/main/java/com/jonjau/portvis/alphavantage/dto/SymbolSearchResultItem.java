@@ -3,7 +3,7 @@ package com.jonjau.portvis.alphavantage.dto;
 import lombok.Data;
 
 @Data
-public class Symbol {
+public class SymbolSearchResultItem {
 
     private String symbol;
     private String name;

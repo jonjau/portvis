@@ -1,37 +1,41 @@
 package com.jonjau.portvis.alphavantage.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 import lombok.Data;
 
-/**
- * MetaData
- */
 @Data
 public class MetaData {
 
-  @JsonProperty("Information")
+  @JsonAlias("Information")
   private String information;
-  @JsonProperty("Symbol")
+
+  @JsonAlias("Symbol")
   private String symbol;
-  @JsonProperty("Output Size")
+
+  @JsonAlias("Output Size")
   private String outputSize;
-  @JsonProperty(TIMEZONE_KEY)
+
+  @JsonAlias(TIMEZONE_KEY)
   private String timezone;
-  @JsonProperty("Last Refreshed")
+
+  @JsonAlias("Last Refreshed")
   private String lastRefreshed;
-  @JsonProperty("Interval")
+
+  @JsonAlias("Interval")
   private String interval;
-  @JsonProperty("Notes")
+
+  @JsonAlias("Notes")
   private String notes;
-  @JsonProperty("From Symbol")
+
+  @JsonAlias("From Symbol")
   private String fromCurrency;
-  @JsonProperty("To Symbol")
+
+  @JsonAlias("To Symbol")
   private String toCurrency;
 
   public static final String META_DATA_RESPONSE_KEY = "Meta Data";
 
-  // TODO: delete this...
+  // Timezone information unused
   public static final String TIMEZONE_KEY = "Time Zone";
 }

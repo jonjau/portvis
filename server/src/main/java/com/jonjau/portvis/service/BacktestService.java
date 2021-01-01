@@ -155,7 +155,7 @@ public class BacktestService {
             backtestResults.add(dateDoubleMap);
         }
 
-        // Combine it such that it becomes dates mapped to the current value of each portfolio
+        // Combine it such that it becomes dates mapped to the current values of each portfolio.
         Map<LocalDate, List<BigDecimal>> resultMap = backtestResults.stream()
                 .flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(
