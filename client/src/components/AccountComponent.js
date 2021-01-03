@@ -1,8 +1,10 @@
 import React from "react";
 import { Row, Container, InputGroup, Form, Col, Button } from "react-bootstrap";
 
-function AccountComponent(props) {
+import SearchService from "../service/SearchService";
+import PortvisApp from "./PortvisApp";
 
+function AccountComponent(props) {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="bg-light min-vh-100">

@@ -12,7 +12,6 @@ function StockComponent(props) {
             {stock.description ? (
               <>
                 <h1>
-                  {/* FIXME:  why is Symbol not symbol.*/}
                   <Badge variant="dark">{stock.symbol}</Badge>
                   &nbsp; {stock.Name}
                 </h1>

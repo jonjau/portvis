@@ -6,57 +6,84 @@ import LoginService from "../service/LoginService";
 import LoginForm from "./LoginForm";
 
 function LoginComponent(props) {
-  const [isModalShown, setIsModalShown] = useState(false);
-  const [message, setMessage] = useState("");
+  const [registerError, setRegisterError] = useState(false);
+  const [registerErrorMessage, setRegisterErrorMessage] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
-  const handleModalClose = () => {
-    setIsModalShown(false);
-  };
-
-  const register = (username, password) =>
+  const register = (username, password) => {
     RegisterService.register(username, password)
       .then((_response) => {
+        // successful registration is immediately followed by auto-login
         login(username, password);
       })
-      .catch((error) => {
-        // FIXME: Failed login followed by failed register will permanently
-        // change the message: the failed login message does not appear again
-        // TODO: assuming all errors mean "username already taken"...
-        // error code 422 should be used for "duplicate username", instead of
-        // 500
-        setIsModalShown(true);
-        setMessage("Failed to register: Username already taken.");
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 409) {
+            // CONFLICT status code: registering with duplicate username
+            setRegisterErrorMessage(
+              `${err.response.data.title}: ${err.response.data.message}`
+            );
+            setRegisterError(true);
+          }
+        } else {
+          // other errors
+          setRegisterErrorMessage("Failed to register.");
+          setRegisterError(true);
+        }
       });
+  };
 
-  const login = (username, password) =>
+  const login = (username, password) => {
     LoginService.login(username, password)
       .then((_response) => {
+        // redirect to portfolios page
         props.history.push("/portfolios/");
       })
-      .catch((_error) => {
-        setIsModalShown(true);
-        setMessage("Failed to login: Invalid credentials.");
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 422) {
+            // UNPROCESSABLE_ENTITY status code: bad username or password
+            setLoginErrorMessage(
+              `${err.response.data.title}: ${err.response.data.message}`
+            );
+            setLoginError(true);
+          }
+        } else {
+          // other errors
+          setLoginErrorMessage("Failed to login.");
+          setLoginError(true);
+        }
       });
+  };
 
   return (
     <>
       <Row className="bg-secondary min-vh-100">
         <Container className="vertical-center">
           <Jumbotron className="col-lg-10 offset-1 mx-auto text-center">
-            <LoginForm submitAction={login} register={register} />
+            <LoginForm loginAction={login} registerAction={register} />
           </Jumbotron>
         </Container>
       </Row>
 
-      <Modal show={isModalShown} onHide={handleModalClose}>
+      <Modal show={registerError} onHide={() => setRegisterError(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            Error
-          </Modal.Title>
+          <Modal.Title>Error</Modal.Title>
         </Modal.Header>
-        <Modal.Body>{message}</Modal.Body>
+        <Modal.Body>{registerErrorMessage}</Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleModalClose}>Okay</Button>
+          <Button onClick={() => setRegisterError(false)}>Okay</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={loginError} onHide={() => setLoginError(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Error</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{loginErrorMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setLoginError(false)}>Okay</Button>
         </Modal.Footer>
       </Modal>
     </>

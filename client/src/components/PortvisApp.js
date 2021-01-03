@@ -66,6 +66,7 @@ function PrivateRoute({ ...props }) {
 }
 
 function PortvisApp() {
+  // TODO: consider React Context or Redux
   const [searchedStock, setSearchedStock] = useState(null);
   const [apiKey, setApiKey] = useState(ALPHAVANTAGE_API_KEY);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
@@ -74,16 +75,17 @@ function PortvisApp() {
   function handleStockSearch(symbol) {
     SearchService.getCompany(symbol)
       .then((response) => {
-        setSearchedStock(response.data);
-      })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
-    // FIXME: if stock not found, need to fail: fix this in the back end
-    // FIXME: if stock not found, should not be able to add to portfolio:
-    // currently this raises a generic error when user backtests...
+        console.log(response.data);
+        if (!response.data.symbol) {
+          // if stock not found, back end will send 200 with null fields.
+          alert("Stock not found.")
+        } else {
+          setSearchedStock(response.data);
+        }
+      });
   }
 
+  // refactor this PrivateRoute soon
   return (
     <>
       <Router>

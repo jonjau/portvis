@@ -3,6 +3,7 @@ package com.jonjau.portvis.service;
 import com.jonjau.portvis.alphavantage.AlphaVantageClient;
 import com.jonjau.portvis.alphavantage.dto.Company;
 import com.jonjau.portvis.alphavantage.dto.SymbolSearchResult;
+import com.jonjau.portvis.exception.CompanyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,12 @@ public class SearchService {
     public Company getCompanyOverview(
             String symbol,
             String apiKey
-    ) throws IOException {
+    ) throws IOException, CompanyNotFoundException {
 
-        return client.getCompanyOverviewResult(symbol, apiKey);
+        Company company = client.getCompanyOverviewResult(symbol, apiKey);
+        if (company.getSymbol() == null) {
+            throw new CompanyNotFoundException(symbol);
+        }
+        return company;
     }
 }

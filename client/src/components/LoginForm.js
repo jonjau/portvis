@@ -5,6 +5,10 @@ import { Row, Col, Button, Form, InputGroup } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+// TODO: consider TypeScript Enums
+const LOGIN = "login";
+const REGISTER = "register";
+
 function LoginForm(props) {
   const [passwordShow, setPasswordShow] = useState(false);
 
@@ -12,7 +16,7 @@ function LoginForm(props) {
     initialValues: {
       username: "",
       password: "",
-      isRegister: false,
+      submissionType: LOGIN,
     },
 
     validationSchema: Yup.object({
@@ -30,13 +34,13 @@ function LoginForm(props) {
     }),
 
     onSubmit: (values) => {
-      if (values.isRegister) {
-        props.register({
+      if (values.submissionType === REGISTER) {
+        props.registerAction({
           username: values.username,
           password: values.password,
         });
-      } else {
-        props.submitAction({
+      } else if (values.submissionType === LOGIN) {
+        props.loginAction({
           username: values.username,
           password: values.password,
         });
@@ -90,18 +94,26 @@ function LoginForm(props) {
           <Col md="4">{formik.errors.password}</Col>
         ) : null}
       </Form.Group>
-      <Button type="submit" value="login" className="m-2" variant="primary">
+      <Button
+        value="login"
+        className="m-2"
+        variant="primary"
+        onClick={() => {
+          formik.setFieldValue("submissionType", LOGIN).then(() => {
+            formik.handleSubmit();
+          });
+        }}
+      >
         Login
       </Button>
       <Button
         value="register"
         className="m-2"
         variant="secondary"
-        onClick={(e) => {
-          e.persist();
-          formik
-            .setFieldValue("isRegister", true)
-            .then(() => formik.handleSubmit(e));
+        onClick={() => {
+          formik.setFieldValue("submissionType", REGISTER).then(() => {
+            formik.handleSubmit();
+          });
         }}
       >
         Register

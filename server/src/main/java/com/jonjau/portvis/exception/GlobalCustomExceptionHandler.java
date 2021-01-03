@@ -23,7 +23,7 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ApiErrorResponse> handle(PortfolioNotFoundException exception) {
         ApiErrorResponse response = ApiErrorResponse.create(
                 HttpStatus.NOT_FOUND,
-                "Portfolio not found.",
+                "Portfolio not found",
                 exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
@@ -32,7 +32,7 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ApiErrorResponse> handle(UserAlreadyExistsException exception) {
         ApiErrorResponse response = ApiErrorResponse.create(
                 HttpStatus.CONFLICT,
-                "Duplicate username.",
+                "Duplicate username",
                 exception);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
@@ -41,7 +41,7 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ApiErrorResponse> handle(BadCredentialsException exception) {
         ApiErrorResponse response = ApiErrorResponse.create(
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                "Incorrect username or password.",
+                "Incorrect username or password",
                 exception);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
@@ -50,9 +50,18 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ApiErrorResponse> handle(MissingPriceInformationException exception) {
         ApiErrorResponse response = ApiErrorResponse.create(
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                "Missing price information.",
+                "Missing price information",
                 exception);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
+
+    @ExceptionHandler({CompanyNotFoundException.class})
+    public ResponseEntity<ApiErrorResponse> handle(CompanyNotFoundException exception) {
+        ApiErrorResponse response = ApiErrorResponse.create(
+                HttpStatus.NOT_FOUND,
+                "Company not found",
+                exception);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     // This one is meant to handle javax.validation constraint errors on the DTOs.
@@ -80,7 +89,7 @@ public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler
 
         ApiErrorResponse response = ApiErrorResponse.create(
                 HttpStatus.BAD_REQUEST,
-                "Invalid method argument.",
+                "Invalid method argument",
                 "Could not validate fields " + errantFields.toString() +
                         " in method argument '" + ex.getParameter().getParameterName() + "'.",
                 errorMessages);

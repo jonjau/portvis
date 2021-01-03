@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import PortfolioEditComponent from "./PortfolioEditComponent";
 import PortfolioService from "../service/PortfolioService";
+import SearchService from "../service/SearchService";
 import { Route } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
 import _ from "lodash";
@@ -71,14 +72,13 @@ function LeftArrow() {
 }
 
 class PortfolioComponent extends Component {
-  // FIXME: check if stocks exist!
+  // FIXME: check if stocks exist! a better check than the current crude one
   constructor(props) {
     super(props);
 
     this.state = {
       portfolios: new Map(),
       currentPortfolioId: this.props.match.params.portfolioId,
-      allocationError: false,
     };
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
     this.getCurrentPortfolio = this.getCurrentPortfolio.bind(this);
@@ -95,6 +95,9 @@ class PortfolioComponent extends Component {
     );
 
     this.isPortfolioFullyAllocated = this.isPortfolioFullyAllocated.bind(this);
+    this.doesPortfolioContainOnlyExistentAssets = this.doesPortfolioContainOnlyExistentAssets.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -164,9 +167,18 @@ class PortfolioComponent extends Component {
     });
   }
 
-  savePortfolioClicked() {
+  async savePortfolioClicked() {
     const currId = this.state.currentPortfolioId;
     console.log(this.state.portfolios);
+
+    const valid = await this.doesPortfolioContainOnlyExistentAssets();
+
+    if (!valid) {
+      alert(
+        `Portfolio contains assets that do not exist or are not supported.
+        Details were not saved`);
+      return;
+    }
 
     PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
       .then((response) => {
@@ -208,7 +220,7 @@ class PortfolioComponent extends Component {
       initialValue: 100,
       allocations: { MSFT: 1.0 },
     };
-    console.log(this.props.username)
+    console.log(this.props.username);
     console.log(`${this.props.match.path}`);
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
@@ -250,7 +262,23 @@ class PortfolioComponent extends Component {
 
   isPortfolioFullyAllocated() {
     const { portfolios, currentPortfolioId: currId } = this.state;
-    return _.sum(Object.values(portfolios.get(currId).allocations)) !== 1.0;
+    return _.sum(Object.values(portfolios.get(currId).allocations)) === 1.0;
+  }
+
+  async doesPortfolioContainOnlyExistentAssets() {
+    const { portfolios, currentPortfolioId } = this.state;
+    const companyNames = Object.keys(
+      portfolios.get(currentPortfolioId).allocations
+    );
+    const exists = await Promise.all(
+      companyNames.map(
+        async (companyName) =>
+          await SearchService.getCompany(companyName)
+            .then(() => true)
+            .catch(() => false)
+      )
+    );
+    return exists.every((c) => c === true);
   }
 
   render() {
@@ -323,7 +351,10 @@ class PortfolioComponent extends Component {
                 <Button
                   className="m-2 btn-success"
                   onClick={this.savePortfolioClicked}
-                  disabled={this.isPortfolioFullyAllocated()}
+                  disabled={
+                    !this.isPortfolioFullyAllocated() ||
+                    !this.doesPortfolioContainOnlyExistentAssets
+                  }
                 >
                   Save changes to portfolio
                 </Button>
@@ -333,12 +364,18 @@ class PortfolioComponent extends Component {
                 >
                   Delete this portfolio
                 </Button>
-                {this.isPortfolioFullyAllocated() ? (
+                {this.isPortfolioFullyAllocated() ? null : (
                   <Alert variant="warning" className="m-2">
                     Total portfolio allocation must be exactly 100%. Adjust
                     assets to reach 100% total allocation before saving changes.
                   </Alert>
-                ) : null}
+                )}
+                {this.doesPortfolioContainOnlyExistentAssets() ? null : (
+                  <Alert variant="warning" className="m-2">
+                    Portfolio contains assets that do not exist or are not
+                    supported.
+                  </Alert>
+                )}
               </Row>
             </>
           ) : (
@@ -354,19 +391,3 @@ class PortfolioComponent extends Component {
 }
 
 export default PortfolioComponent;
-
-// another way of doing the SideNav items
-// <Nav.Link
-//   as={ListGroup.Item}
-//   variant="dark"
-//   action
-//   key={portfolio.id}
-//   eventKey={`/${portfolio.id}`}
-//   onClick={() => {
-//     this.setState({ currentPortfolioId: portfolio.id });
-//     this.props.history.push(`/portfolios/${portfolio.id}`);
-//   }}
-// >
-//   {/* truncate portfolio name so display looks sensible */}
-//   {_.truncate(portfolio.name, {'length':18})} ({portfolio.id})
-// </Nav.Link>
