@@ -1,10 +1,7 @@
 import React from "react";
 import { Row, Container, InputGroup, Form, Col, Button } from "react-bootstrap";
 
-import SearchService from "../service/SearchService";
-import PortvisApp from "./PortvisApp";
-
-function AccountComponent(props) {
+const Account = (props) => {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="bg-light min-vh-100">
@@ -52,4 +49,4 @@ function AccountComponent(props) {
   );
 }
 
-export default AccountComponent;
+export default Account;

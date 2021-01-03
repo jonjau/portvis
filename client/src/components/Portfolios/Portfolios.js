@@ -8,9 +8,9 @@ import {
   ButtonGroup,
   Alert,
 } from "react-bootstrap";
-import PortfolioEditComponent from "./PortfolioEditComponent";
-import PortfolioService from "../service/PortfolioService";
-import SearchService from "../service/SearchService";
+import PortfolioEditComponent from "./PortfolioEdit";
+import PortfolioService from "../../services/PortfolioService";
+import SearchService from "../../services/SearchService";
 import { Route } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
 import _ from "lodash";
@@ -217,7 +217,7 @@ class PortfolioComponent extends Component {
     const newPortfolio = {
       username: this.props.username,
       name: "",
-      initialValue: 100,
+      initialValue: 1000,
       allocations: { MSFT: 1.0 },
     };
     console.log(this.props.username);
@@ -370,6 +370,7 @@ class PortfolioComponent extends Component {
                     assets to reach 100% total allocation before saving changes.
                   </Alert>
                 )}
+                {/* FIXME: does not work: */}
                 {this.doesPortfolioContainOnlyExistentAssets() ? null : (
                   <Alert variant="warning" className="m-2">
                     Portfolio contains assets that do not exist or are not

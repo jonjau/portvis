@@ -10,20 +10,20 @@ import { Row, Container, Jumbotron, Spinner } from "react-bootstrap";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import LoginComponent from "./LoginComponent";
-import StockComponent from "./StockComponent";
-import BacktestComponent from "./BacktestComponent";
-import PortfolioComponent from "./PortfolioComponent";
-import NavigationBar from "./NavigationBar";
+import LoginComponent from "./Login/Login";
+import StockComponent from "./Stocks";
+import BacktestComponent from "./Backtest";
+import PortfolioComponent from "./Portfolios/Portfolios";
+import NavigationBar from "./NavigationBar/NavigationBar";
 
-import SearchService from "../service/SearchService";
-import LoginService from "../service/LoginService";
-import AboutComponent from "./AboutComponent";
-import FrontPageComponent from "./FrontPageComponent";
+import SearchService from "../services/SearchService";
+import LoginService from "../services/LoginService";
+import About from "./About";
+import FrontPageComponent from "./FrontPage";
 
 import { ALPHAVANTAGE_API_KEY } from "../constants";
 import { useEffect } from "react";
-import AccountComponent from "./AccountComponent";
+import Account from "./Account";
 
 const LoadingPage = () => (
   <Row className="bg-secondary min-vh-100">
@@ -134,7 +134,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/account/"
               render={(props) => (
-                <AccountComponent
+                <Account
                   setApiKey={setApiKey}
                   apiKey={apiKey}
                   username={username}
@@ -149,7 +149,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/about/"
               render={(props) => (
-                <AboutComponent
+                <About
                   username={username}
                   {...props}
                 />

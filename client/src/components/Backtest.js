@@ -8,8 +8,8 @@ import {
   ButtonGroup,
   Card,
 } from "react-bootstrap";
-import PortfolioService from "../service/PortfolioService";
-import BacktestService from "../service/BacktestService";
+import PortfolioService from "../services/PortfolioService";
+import BacktestService from "../services/BacktestService";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";

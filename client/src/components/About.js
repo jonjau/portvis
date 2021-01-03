@@ -1,7 +1,7 @@
 import React from "react";
 import { Row, Container } from "react-bootstrap";
 
-function AboutComponent() {
+const About = () => {
   return (
     <Row className="bg-secondary min-vh-100">
       <Container className="bg-light min-vh-100">
@@ -31,4 +31,4 @@ function AboutComponent() {
   );
 }
 
-export default AboutComponent;
+export default About;
