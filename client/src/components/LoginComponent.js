@@ -1,43 +1,92 @@
-import React from "react";
-import { Row, Container, Jumbotron } from "react-bootstrap";
+import React, { useState } from "react";
+import { Row, Container, Jumbotron, Modal, Button } from "react-bootstrap";
 
 import RegisterService from "../service/RegisterService";
 import LoginService from "../service/LoginService";
 import LoginForm from "./LoginForm";
-import { useHistory } from "react-router-dom";
 
 function LoginComponent(props) {
-  const history = useHistory();
+  const [registerError, setRegisterError] = useState(false);
+  const [registerErrorMessage, setRegisterErrorMessage] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
-  const register = (username, password) =>
+  const register = (username, password) => {
     RegisterService.register(username, password)
-      .then((response) => {
+      .then((_response) => {
+        // successful registration is immediately followed by auto-login
         login(username, password);
       })
-      .catch((error) => alert("Failed to register"));
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 409) {
+            // CONFLICT status code: registering with duplicate username
+            setRegisterErrorMessage(
+              `${err.response.data.title}: ${err.response.data.message}`
+            );
+            setRegisterError(true);
+          }
+        } else {
+          // other errors
+          setRegisterErrorMessage("Failed to register.");
+          setRegisterError(true);
+        }
+      });
+  };
 
-  const login = (username, password) =>
+  const login = (username, password) => {
     LoginService.login(username, password)
-      .then((response) => {
-        history.push("/portfolios/");
+      .then((_response) => {
+        // redirect to portfolios page
+        props.history.push("/portfolios/");
       })
-      .catch((error) => alert("Failed to login"));
-
-  const isLoggedIn = (username, password) =>
-    LoginService.isLoggedIn()
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => console.log(error));
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 422) {
+            // UNPROCESSABLE_ENTITY status code: bad username or password
+            setLoginErrorMessage(
+              `${err.response.data.title}: ${err.response.data.message}`
+            );
+            setLoginError(true);
+          }
+        } else {
+          // other errors
+          setLoginErrorMessage("Failed to login.");
+          setLoginError(true);
+        }
+      });
+  };
 
   return (
-    <Row className="bg-secondary min-vh-100">
-      <Container className="vertical-center">
-        <Jumbotron className="col-lg-10 offset-1 mx-auto text-center">
-          <LoginForm submitAction={login} register={register} />
-        </Jumbotron>
-      </Container>
-    </Row>
+    <>
+      <Row className="bg-secondary min-vh-100">
+        <Container className="vertical-center">
+          <Jumbotron className="col-lg-10 offset-1 mx-auto text-center">
+            <LoginForm loginAction={login} registerAction={register} />
+          </Jumbotron>
+        </Container>
+      </Row>
+
+      <Modal show={registerError} onHide={() => setRegisterError(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Error</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{registerErrorMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setRegisterError(false)}>Okay</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={loginError} onHide={() => setLoginError(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Error</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{loginErrorMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setLoginError(false)}>Okay</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }
 

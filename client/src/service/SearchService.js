@@ -13,7 +13,7 @@ class SearchService {
       keywords: keywords,
       apiKey: PortvisApp.apiKey,
     });
-    const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
+    const url = `${PORTVIS_API_URL}/search?${params.toString()}`;
     return axiosInstance.get(url);
   }
 
@@ -22,7 +22,7 @@ class SearchService {
       company: symbol,
       apiKey: PortvisApp.apiKey,
     });
-    const url = `${PORTVIS_API_URL}/query?${params.toString()}`;
+    const url = `${PORTVIS_API_URL}/search?${params.toString()}`;
     return axiosInstance.get(url);
   }
 }

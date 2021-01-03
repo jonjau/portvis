@@ -12,7 +12,7 @@ class LoginService {
   }
 
   isLoggedIn() {
-    return axiosInstance.get(`${PORTVIS_API_URL}/authenticate/`);
+    return axiosInstance.get(`${login_endpoint}`);
   }
 }
 

@@ -42,7 +42,6 @@ function PortfolioDetailsForm(props) {
     enableReinitialize: true,
   });
 
-  //FIXME: mr-sm-2???
   // `name` in a Form.Control (like HTML's <input>) identifies what the
   // variable's name is in the form. It must be the same with what Formik knows.
   return (

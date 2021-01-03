@@ -9,30 +9,29 @@ function StockComponent(props) {
       <Container className="bg-light min-vh-100">
         {stock ? (
           <Container className="m-2">
-            {stock.Description ? (
+            {stock.description ? (
               <>
                 <h1>
-                  {/* FIXME:  why is Symbol not symbol.*/}
-                  <Badge variant="dark">{stock.Symbol}</Badge>
+                  <Badge variant="dark">{stock.symbol}</Badge>
                   &nbsp; {stock.Name}
                 </h1>
                 <h3 className="text-muted">
-                  {stock.Sector} | {stock.Industry}
+                  {stock.sector} | {stock.industry}
                 </h3>
-                <h5 className="text-muted">{stock.AssetType}</h5>
-                <div>{stock.Description}</div>
+                <h5 className="text-muted">{stock.assetType}</h5>
+                <div>{stock.description}</div>
               </>
             ) : (
-              <h5 className="text-muted text-center">
+              <h4 className="text-muted text-center">
                 No information found for this stock.
-              </h5>
+              </h4>
             )}
           </Container>
         ) : (
           <Container className="m-2">
-            <h5 className="text-muted text-center">
+            <h4 className="text-muted text-center">
               Search for a stock in the search bar...
-            </h5>
+            </h4>
           </Container>
         )}
       </Container>
