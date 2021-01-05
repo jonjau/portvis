@@ -14,62 +14,8 @@ import SearchService from "../../services/SearchService";
 import { Route } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
 import _ from "lodash";
-
-/**
- * Component wrapper that returns a refresh icon from Bootstrap's icon set.
- */
-function RefreshIcon() {
-  return (
-    <svg
-      width="1em"
-      height="1em"
-      viewBox="0 0 16 16"
-      className="bi bi-arrow-repeat"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fillRule="evenodd"
-        d="M2.854 7.146a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L2.5
-        8.207l1.646 1.647a.5.5 0 0 0 .708-.708l-2-2zm13-1a.5.5 0 0 0-.708
-        0L13.5 7.793l-1.646-1.647a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708
-        0l2-2a.5.5 0 0 0 0-.708z"
-      />
-      <path
-        fillRule="evenodd"
-        d="M8 3a4.995 4.995 0 0 0-4.192 2.273.5.5 0 0 1-.837-.546A6 6 0 0 1
-        14 8a.5.5 0 0 1-1.001 0 5 5 0 0 0-5-5zM2.5 7.5A.5.5 0 0 1 3 8a5 5 0 0
-        0 9.192 2.727.5.5 0 1 1 .837.546A6 6 0 0 1 2 8a.5.5 0 0 1 .501-.5z"
-      />
-    </svg>
-  );
-}
-
-/**
- * Component wrapper that returns a left arrow icon from Bootstrap's icon set.
- */
-function LeftArrow() {
-  return (
-    <svg
-      width="2em"
-      height="2em"
-      viewBox="0 0 16 16"
-      className="bi bi-arrow-left-short"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fillRule="evenodd"
-        d="M7.854 4.646a.5.5 0 0 1 0 .708L5.207 8l2.647 2.646a.5.5 0 0
-        1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 0 1 .708 0z"
-      />
-      <path
-        fillRule="evenodd"
-        d="M4.5 8a.5.5 0 0 1 .5-.5h6.5a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"
-      />
-    </svg>
-  );
-}
+import RefreshIcon from "../icons/RefreshIcon";
+import LeftArrow from "../icons/LeftArrow";
 
 class PortfolioComponent extends Component {
   // FIXME: check if stocks exist! a better check than the current crude one
@@ -159,8 +105,6 @@ class PortfolioComponent extends Component {
     newPortfolios.get(currId).name = portfolioName;
     newPortfolios.get(currId).initialValue = initialValue;
 
-    console.log("details submitted");
-
     this.setState({
       name: portfolioDetails.portfolioName,
       initialValue: portfolioDetails.initialValue,
@@ -170,15 +114,6 @@ class PortfolioComponent extends Component {
   async savePortfolioClicked() {
     const currId = this.state.currentPortfolioId;
     console.log(this.state.portfolios);
-
-    const valid = await this.doesPortfolioContainOnlyExistentAssets();
-
-    if (!valid) {
-      alert(
-        `Portfolio contains assets that do not exist or are not supported.
-        Details were not saved`);
-      return;
-    }
 
     PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
       .then((response) => {
@@ -265,6 +200,7 @@ class PortfolioComponent extends Component {
     return _.sum(Object.values(portfolios.get(currId).allocations)) === 1.0;
   }
 
+  // this should work, how does one render things based on async state updates?
   async doesPortfolioContainOnlyExistentAssets() {
     const { portfolios, currentPortfolioId } = this.state;
     const companyNames = Object.keys(
@@ -370,13 +306,10 @@ class PortfolioComponent extends Component {
                     assets to reach 100% total allocation before saving changes.
                   </Alert>
                 )}
-                {/* FIXME: does not work: */}
-                {this.doesPortfolioContainOnlyExistentAssets() ? null : (
-                  <Alert variant="warning" className="m-2">
-                    Portfolio contains assets that do not exist or are not
-                    supported.
-                  </Alert>
-                )}
+                <Alert variant="info" className="m-2">
+                  Ensure assets in portfolio exist and are supported by
+                  searching them in the search bar.
+                </Alert>
               </Row>
             </>
           ) : (

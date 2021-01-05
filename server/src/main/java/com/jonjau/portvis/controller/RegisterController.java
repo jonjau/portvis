@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/register/")
+@RequestMapping("/api/register/")
 //@CrossOrigin
 //@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class RegisterController {

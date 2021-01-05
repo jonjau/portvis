@@ -65,19 +65,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.cors().configurationSource(
                 request -> {
                     CorsConfiguration cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                    cors.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
                     cors.setAllowedMethods(Arrays.asList("GET", "POST","PUT", "DELETE", "OPTIONS"));
                     cors.setAllowedHeaders(Collections.singletonList("*"));
                     cors.setAllowCredentials(true);
                     return cors;
                 }
-        ).and()
-//        httpSecurity
+        )
+                .and()
                 .csrf().disable()
                 // don't authenticate POSTs to login and register
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.POST, "/login/").permitAll()
-                    .antMatchers(HttpMethod.POST, "/register/").permitAll()
+                    .antMatchers(HttpMethod.POST, "/api/login/").permitAll()
+                    .antMatchers(HttpMethod.POST, "/api/register/").permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 // make sure we use stateless session; session won't be used to

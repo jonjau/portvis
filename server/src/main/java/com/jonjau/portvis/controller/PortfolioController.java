@@ -16,6 +16,7 @@ import java.util.Map;
 // FIXME: don't forget to deal with this:
 //@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
+@RequestMapping("/api")
 public class PortfolioController {
 
 

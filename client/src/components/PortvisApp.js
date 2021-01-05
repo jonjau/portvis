@@ -85,7 +85,7 @@ function PortvisApp() {
       });
   }
 
-  // refactor this PrivateRoute soon
+  // refactor the PrivateRoute stuff soon
   return (
     <>
       <Router>

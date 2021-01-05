@@ -1,0 +1,29 @@
+version: "3.9"
+services: 
+
+  portvis-db:
+    container_name: portvis-db
+    image: mysql:8
+    environment: 
+      MYSQL_DATABASE: portvisdb
+      MYSQL_USER: portvis
+      MYSQL_PASSWORD: portvis
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+
+  portvis-client:
+    container_name: portvis-client
+    build: ./client
+    ports:
+      - 3000:80
+    depends_on:
+      - portvis-server
+
+  portvis-server:
+    container_name: portvis-server
+    build: ./server
+    ports:
+      - 8080:8080
+    depends_on:
+      - portvis-db
