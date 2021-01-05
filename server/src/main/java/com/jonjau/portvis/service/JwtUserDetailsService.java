@@ -1,7 +1,9 @@
 package com.jonjau.portvis.service;
 
+import com.jonjau.portvis.dto.PortfolioDto;
 import com.jonjau.portvis.exception.UserAlreadyExistsException;
 import com.jonjau.portvis.repository.UserRepository;
+import com.jonjau.portvis.repository.entity.Portfolio;
 import com.jonjau.portvis.repository.entity.User;
 import com.jonjau.portvis.dto.UserDto;
 import com.jonjau.portvis.util.JwtTokenComponent;
@@ -67,15 +69,27 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User with username '" + username + "' not found.");
-        }
+        UserDto userDto = getUser(username);
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
+                userDto.getUsername(),
+                userDto.getPassword(),
                 new ArrayList<>()
         );
+    }
+
+    public UserDto getUser(String username) throws UsernameNotFoundException {
+        return toDto(findUser(username));
+    }
+
+    public UserDto updateUser(UserDto updatedUserDto) throws UsernameNotFoundException {
+        String username = updatedUserDto.getUsername();
+        User user = findUser(username);
+
+        user.setApiKey(updatedUserDto.getApiKey());
+
+        User updatedUser = userRepository.save(user);
+
+        return toDto(updatedUser);
     }
 
     public boolean userExists(String username) {
@@ -90,8 +104,21 @@ public class JwtUserDetailsService implements UserDetailsService {
         User newUser = new User();
         newUser.setUsername(user.getUsername());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setApiKey(user.getApiKey());
 
         return toDto(userRepository.save(newUser));
+    }
+
+    private User findUser(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User with username '" + username + "' not found.");
+        }
+        return user;
+    }
+
+    private User toEntity(UserDto userDto) {
+        return modelMapperComponent.map(userDto, User.class);
     }
 
     private UserDto toDto(User user) {

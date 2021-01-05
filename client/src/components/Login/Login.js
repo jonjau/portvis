@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Row, Container, Jumbotron, Modal, Button } from "react-bootstrap";
 
-import RegisterService from "../service/RegisterService";
-import LoginService from "../service/LoginService";
+import RegisterService from "../../services/RegisterService";
+import LoginService from "../../services/LoginService";
 import LoginForm from "./LoginForm";
 
 function LoginComponent(props) {

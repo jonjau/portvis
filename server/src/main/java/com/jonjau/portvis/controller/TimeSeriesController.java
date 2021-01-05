@@ -3,10 +3,7 @@ package com.jonjau.portvis.controller;
 import com.jonjau.portvis.alphavantage.AlphaVantageClient;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -14,6 +11,7 @@ import java.io.IOException;
  * TimeSeriesController
  */
 @RestController
+@RequestMapping("/api")
 public class TimeSeriesController {
 
     private final AlphaVantageClient client;
@@ -24,10 +22,10 @@ public class TimeSeriesController {
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
-    @GetMapping(value = "/timeseries", params = {"symbol", "apiKey"})
+    @GetMapping(value = "/timeseries", params = {"symbol"})
     public TimeSeriesResult getDaily(
             @RequestParam("symbol") String symbol,
-            @RequestParam("apiKey") String apiKey
+            @RequestAttribute String apiKey
     ) throws IOException {
         return client.getTimeSeriesResult(symbol, apiKey);
     }

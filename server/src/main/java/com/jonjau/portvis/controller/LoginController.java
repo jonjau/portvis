@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/login/")
+@RequestMapping("/api/login/")
 public class LoginController {
 
     @Value("${portvis.auth.accessTokenCookieName}")
@@ -38,9 +38,9 @@ public class LoginController {
         // FIXME: cookie.setSecure(true);
         // Delete cookie after 5 hours, to match JWT expiry.
         // Prevent XSS, and make it global (accessible everywhere)
-//        cookie.setMaxAge(5*60*60);
-        cookie.setMaxAge(2 * 60);
-        cookie.setHttpOnly(false);
+//        cookie.setSecure(true);
+        cookie.setMaxAge(2*60);
+        cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setDomain("");
         response.addCookie(cookie);

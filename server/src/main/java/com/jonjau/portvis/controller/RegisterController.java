@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/register/")
+@RequestMapping("/api/register/")
 //@CrossOrigin
 //@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class RegisterController {
@@ -25,6 +25,8 @@ public class RegisterController {
     public UserDto registerUser(
             @Valid @RequestBody UserDto user
     ) throws UserAlreadyExistsException {
+        System.out.println(user);
+        // the password returned will be encrypted.
         return userDetailsService.registerUser(user);
     }
 }

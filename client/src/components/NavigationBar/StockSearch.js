@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import { Button, Form } from "react-bootstrap";
 
-import SearchService from "../service/SearchService";
+import SearchService from "../../services/SearchService";
 import { useHistory } from "react-router-dom";
 
 function StockSearch(props) {

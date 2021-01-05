@@ -6,50 +6,28 @@ import {
   Switch,
 } from "react-router-dom";
 
-import { Row, Container, Jumbotron, Spinner } from "react-bootstrap";
-
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import LoginComponent from "./LoginComponent";
-import StockComponent from "./StockComponent";
-import BacktestComponent from "./BacktestComponent";
-import PortfolioComponent from "./PortfolioComponent";
-import NavigationBar from "./NavigationBar";
+import Login from "./Login/Login";
+import Stocks from "./Stocks";
+import Backtest from "./Backtest/Backtest";
+import Portfolios from "./Portfolios/Portfolios";
+import NavigationBar from "./NavigationBar/NavigationBar";
 
-import SearchService from "../service/SearchService";
-import LoginService from "../service/LoginService";
-import AboutComponent from "./AboutComponent";
-import FrontPageComponent from "./FrontPageComponent";
+import SearchService from "../services/SearchService";
+import LoginService from "../services/LoginService";
+import About from "./About";
+import FrontPage from "./FrontPage";
 
-import { ALPHAVANTAGE_API_KEY } from "../constants";
 import { useEffect } from "react";
-import AccountComponent from "./AccountComponent";
+import Account from "./Account";
+import Loading from "./Loading";
+import Error from "./Error";
 
-const LoadingPage = () => (
-  <Row className="bg-secondary min-vh-100">
-    <Container className="vertical-center">
-      <Jumbotron className="col-4 offset-4 mx-auto text-center">
-        <Spinner animation="border" />
-      </Jumbotron>
-    </Container>
-  </Row>
-);
-
-const ErrorPage = () => (
-  <Row className="bg-secondary min-vh-100">
-    <Container className="vertical-center">
-      <Jumbotron className="col-6 offset-3 mx-auto text-center">
-        <h1>404: Page not found.</h1>
-      </Jumbotron>
-    </Container>
-  </Row>
-);
-
-function PrivateRoute({ ...props }) {
+const PrivateRoute = ({ ...props }) => {
   useEffect(() => {
     LoginService.isLoggedIn()
       .then((response) => {
-        console.log("checked login");
         props.setUsername(response.data.username);
         props.setIsLoggedIn(true);
       })
@@ -57,7 +35,7 @@ function PrivateRoute({ ...props }) {
   }, [props]);
 
   return props.isLoggedIn === null ? (
-    <LoadingPage />
+    <Loading />
   ) : props.isLoggedIn ? (
     <Route {...props} />
   ) : (
@@ -65,14 +43,13 @@ function PrivateRoute({ ...props }) {
   );
 }
 
-function PortvisApp() {
+const PortvisApp = () => {
   // TODO: consider React Context or Redux
   const [searchedStock, setSearchedStock] = useState(null);
-  const [apiKey, setApiKey] = useState(ALPHAVANTAGE_API_KEY);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [username, setUsername] = useState("");
 
-  function handleStockSearch(symbol) {
+  const handleStockSearch = (symbol) => {
     SearchService.getCompany(symbol)
       .then((response) => {
         console.log(response.data);
@@ -85,7 +62,7 @@ function PortvisApp() {
       });
   }
 
-  // refactor this PrivateRoute soon
+  // refactor the PrivateRoute stuff soon
   return (
     <>
       <Router>
@@ -93,8 +70,8 @@ function PortvisApp() {
         <div className="container-fluid flex-grow-1">
           <Switch>
             {/* some paths DON'T have to be exact in this case */}
-            <Route path="/" exact component={FrontPageComponent} />
-            <Route path="/login/" component={LoginComponent} />
+            <Route path="/" exact component={FrontPage} />
+            <Route path="/login/" component={Login} />
             <PrivateRoute
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
@@ -102,7 +79,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/portfolios/"
               render={(props) => (
-                <PortfolioComponent username={username} {...props} />
+                <Portfolios username={username} {...props} />
               )}
               // {/* component={PortfolioComponent} */}
             />
@@ -113,7 +90,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/backtest/"
               render={(props) => (
-                <BacktestComponent username={username} {...props} />
+                <Backtest username={username} {...props} />
               )}
               // {/* component={BacktestComponent} */}
             />
@@ -124,7 +101,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/stocks/"
               render={(props) => (
-                <StockComponent searchedStock={searchedStock} {...props} />
+                <Stocks searchedStock={searchedStock} {...props} />
               )}
             />
             <PrivateRoute
@@ -134,10 +111,7 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/account/"
               render={(props) => (
-                <AccountComponent
-                  setApiKey={setApiKey}
-                  apiKey={apiKey}
-                  username={username}
+                <Account
                   {...props}
                 />
               )}
@@ -149,14 +123,13 @@ function PortvisApp() {
               setUsername={setUsername}
               path="/about/"
               render={(props) => (
-                <AboutComponent
-                  username={username}
+                <About
                   {...props}
                 />
               )}
             />
             <Route
-              component={ErrorPage}
+              component={Error}
             />
           </Switch>
         </div>

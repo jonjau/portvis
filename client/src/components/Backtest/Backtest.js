@@ -6,10 +6,13 @@ import {
   Button,
   ListGroup,
   ButtonGroup,
-  Card,
+  Spinner,
 } from "react-bootstrap";
-import PortfolioService from "../service/PortfolioService";
-import BacktestService from "../service/BacktestService";
+import PortfolioService from "../../services/PortfolioService";
+import BacktestService from "../../services/BacktestService";
+
+import RefreshIcon from "../icons/RefreshIcon";
+import RemarksCard from "./RemarksCard";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,36 +21,6 @@ import Chart from "chart.js";
 import moment from "moment";
 //import "chartjs-adapter-moment";
 import _ from "lodash";
-
-/**
- * Component wrapper that returns a refresh icon from Bootstrap's icon set.
- */
-function RefreshIcon() {
-  return (
-    <svg
-      width="1em"
-      height="1em"
-      viewBox="0 0 16 16"
-      className="bi bi-arrow-repeat"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fillRule="evenodd"
-        d="M2.854 7.146a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L2.5
-        8.207l1.646 1.647a.5.5 0 0 0 .708-.708l-2-2zm13-1a.5.5 0 0 0-.708
-        0L13.5 7.793l-1.646-1.647a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708
-        0l2-2a.5.5 0 0 0 0-.708z"
-      />
-      <path
-        fillRule="evenodd"
-        d="M8 3a4.995 4.995 0 0 0-4.192 2.273.5.5 0 0 1-.837-.546A6 6 0 0 1
-        14 8a.5.5 0 0 1-1.001 0 5 5 0 0 0-5-5zM2.5 7.5A.5.5 0 0 1 3 8a5 5 0 0
-        0 9.192 2.727.5.5 0 1 1 .837.546A6 6 0 0 1 2 8a.5.5 0 0 1 .501-.5z"
-      />
-    </svg>
-  );
-}
 
 class BacktestComponent extends Component {
   constructor(props) {
@@ -60,6 +33,7 @@ class BacktestComponent extends Component {
       startDate: moment().subtract(24, "days"),
       endDate: moment().subtract(3, "days"),
       chartData: [],
+      loading: false,
     };
     this.chartRef = React.createRef();
     this.chartColors = [
@@ -122,18 +96,18 @@ class BacktestComponent extends Component {
     const portfolioIds = this.state.selectedPortfolioIds;
     const startDate = this.state.startDate.format("YYYY-MM-DD");
     const endDate = this.state.endDate.format("YYYY-MM-DD");
-    //const dates = getDatesBetween(new Date(2020, 7, 12), new Date(2020, 7, 15));
-    //console.log(dates);
-    BacktestService.getReturns(portfolioIds, startDate, endDate)
-      .then((response) => {
-        this.setState({ chartData: response.data });
-        this.plotChart();
-      })
-      .catch((error) => {
-        alert("An error occurred when trying to backtest the portfolios.");
-        console.log(`error: ${JSON.stringify(error, null, 2)}`);
-        throw error;
-      });
+    this.setState({loading: true}, () => {
+      BacktestService.getReturns(portfolioIds, startDate, endDate)
+        .then((response) => {
+          this.setState({ chartData: response.data, loading: false });
+          this.plotChart();
+        })
+        .catch((error) => {
+          this.setState({ loading: false });
+          alert("An error occurred when trying to backtest the portfolios.");
+          console.log(`error: ${JSON.stringify(error, null, 2)}`);
+        });
+    })
   }
 
   plotChart() {
@@ -230,7 +204,7 @@ class BacktestComponent extends Component {
           <ListGroup>
             <ListGroup.Item align="center" disable="true" variant="secondary">
               <Row>
-                <Col>
+                <Col className="d-flex justify-content-center">
                   <ButtonGroup className="p-2">
                     <Button
                       className="btn-info"
@@ -245,6 +219,7 @@ class BacktestComponent extends Component {
                       <RefreshIcon />
                     </Button>
                   </ButtonGroup>
+                  {this.state.loading ? <Spinner animation="border" /> : null}
                 </Col>
               </Row>
               <Row>
@@ -359,30 +334,7 @@ class BacktestComponent extends Component {
             </div>
           </Row>
           <Row>
-            <Card className="m-4">
-              <Card.Header>
-                <h4>Assumptions and remarks</h4>
-              </Card.Header>
-              <Card.Body>
-                <ul>
-                  <li>
-                    Fetching price data for diverse portfolios is slow (a few
-                    seconds for each distinct stock).
-                  </li>
-                  <li>
-                    The price metric used for each period is the OHLC average.
-                  </li>
-                  <li>Returns from assets are compounded daily.</li>
-                  <li>Portfolios are rebalanced daily.</li>
-                  <li>No fees associated with rebalancing.</li>
-                  <li>Prices are not adjusted after stock splits.</li>
-                  <li>
-                    Figures are approximate (significant deviation for larger
-                    date ranges).
-                  </li>
-                </ul>
-              </Card.Body>
-            </Card>
+            <RemarksCard />
           </Row>
         </Col>
       </Row>
