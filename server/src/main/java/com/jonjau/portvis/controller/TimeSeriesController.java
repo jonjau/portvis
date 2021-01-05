@@ -22,10 +22,10 @@ public class TimeSeriesController {
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
-    @GetMapping(value = "/timeseries", params = {"symbol", "apiKey"})
+    @GetMapping(value = "/timeseries", params = {"symbol"})
     public TimeSeriesResult getDaily(
             @RequestParam("symbol") String symbol,
-            @RequestParam("apiKey") String apiKey
+            @RequestAttribute String apiKey
     ) throws IOException {
         return client.getTimeSeriesResult(symbol, apiKey);
     }

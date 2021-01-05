@@ -26,12 +26,12 @@ public class BacktestController {
     }
 
     // no trailing backslash, 'backtest' IS the resource
-    @GetMapping(value = "/backtest", params = {"id", "start", "end", "apiKey"})
+    @GetMapping(value = "/backtest", params = {"id", "start", "end"})
     public Map<LocalDate, List<BigDecimal>> getReturns(
             @RequestParam("id") List<Long> portfolioIds,
             @RequestParam("start") String startDateString,
             @RequestParam("end") String endDateString,
-            @RequestParam("apiKey") String apiKey
+            @RequestAttribute String apiKey
     ) throws Exception {
 
         LocalDate start = DateUtil.parseDate(startDateString);

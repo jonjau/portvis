@@ -20,19 +20,19 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    @GetMapping(value = "/search", params = {"keywords", "apiKey"})
+    @GetMapping(value = "/search", params = {"keywords"})
     public SymbolSearchResult getSymbolSearch(
             @RequestParam("keywords") String keywords,
-            @RequestParam("apiKey") String apiKey
+            @RequestAttribute String apiKey
     ) throws IOException {
 
         return searchService.getSymbolSearch(keywords, apiKey);
     }
 
-    @GetMapping(value = "/search", params = {"company", "apiKey"})
+    @GetMapping(value = "/search", params = {"company"})
     public Company getCompanyOverview(
             @RequestParam("company") String symbol,
-            @RequestParam("apiKey") String apiKey
+            @RequestAttribute String apiKey
     ) throws IOException, CompanyNotFoundException {
 
         return searchService.getCompanyOverview(symbol, apiKey);

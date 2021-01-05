@@ -25,6 +25,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class AlphaVantageClient {
 
+    public static final String DEFAULT_API_KEY = "D2D48LZKE59QAB83";
+
     // buffer size for the retrieved data, 1 MB or lower is not enough for the time series data
     // with output size = full.
     private static final int MAX_BUFFER_SIZE_MB = 8;
