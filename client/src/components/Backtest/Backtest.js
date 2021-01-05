@@ -6,12 +6,13 @@ import {
   Button,
   ListGroup,
   ButtonGroup,
-  Card,
+  Spinner,
 } from "react-bootstrap";
-import PortfolioService from "../services/PortfolioService";
-import BacktestService from "../services/BacktestService";
+import PortfolioService from "../../services/PortfolioService";
+import BacktestService from "../../services/BacktestService";
 
-import RefreshIcon from "./icons/RefreshIcon";
+import RefreshIcon from "../icons/RefreshIcon";
+import RemarksCard from "./RemarksCard";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -32,6 +33,7 @@ class BacktestComponent extends Component {
       startDate: moment().subtract(24, "days"),
       endDate: moment().subtract(3, "days"),
       chartData: [],
+      loading: false,
     };
     this.chartRef = React.createRef();
     this.chartColors = [
@@ -94,18 +96,18 @@ class BacktestComponent extends Component {
     const portfolioIds = this.state.selectedPortfolioIds;
     const startDate = this.state.startDate.format("YYYY-MM-DD");
     const endDate = this.state.endDate.format("YYYY-MM-DD");
-    //const dates = getDatesBetween(new Date(2020, 7, 12), new Date(2020, 7, 15));
-    //console.log(dates);
-    BacktestService.getReturns(portfolioIds, startDate, endDate)
-      .then((response) => {
-        this.setState({ chartData: response.data });
-        this.plotChart();
-      })
-      .catch((error) => {
-        alert("An error occurred when trying to backtest the portfolios.");
-        console.log(`error: ${JSON.stringify(error, null, 2)}`);
-        throw error;
-      });
+    this.setState({loading: true}, () => {
+      BacktestService.getReturns(portfolioIds, startDate, endDate)
+        .then((response) => {
+          this.setState({ chartData: response.data, loading: false });
+          this.plotChart();
+        })
+        .catch((error) => {
+          this.setState({ loading: false });
+          alert("An error occurred when trying to backtest the portfolios.");
+          console.log(`error: ${JSON.stringify(error, null, 2)}`);
+        });
+    })
   }
 
   plotChart() {
@@ -202,7 +204,7 @@ class BacktestComponent extends Component {
           <ListGroup>
             <ListGroup.Item align="center" disable="true" variant="secondary">
               <Row>
-                <Col>
+                <Col className="d-flex justify-content-center">
                   <ButtonGroup className="p-2">
                     <Button
                       className="btn-info"
@@ -217,6 +219,7 @@ class BacktestComponent extends Component {
                       <RefreshIcon />
                     </Button>
                   </ButtonGroup>
+                  {this.state.loading ? <Spinner animation="border" /> : null}
                 </Col>
               </Row>
               <Row>
@@ -331,30 +334,7 @@ class BacktestComponent extends Component {
             </div>
           </Row>
           <Row>
-            <Card className="m-4">
-              <Card.Header>
-                <h4>Assumptions and remarks</h4>
-              </Card.Header>
-              <Card.Body>
-                <ul>
-                  <li>
-                    Fetching price data for diverse portfolios is slow (a few
-                    seconds for each distinct stock).
-                  </li>
-                  <li>
-                    The price metric used for each period is the OHLC average.
-                  </li>
-                  <li>Returns from assets are compounded daily.</li>
-                  <li>Portfolios are rebalanced daily.</li>
-                  <li>No fees associated with rebalancing.</li>
-                  <li>Prices are not adjusted after stock splits.</li>
-                  <li>
-                    Figures are approximate (significant deviation for larger
-                    date ranges).
-                  </li>
-                </ul>
-              </Card.Body>
-            </Card>
+            <RemarksCard />
           </Row>
         </Col>
       </Row>

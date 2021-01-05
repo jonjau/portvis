@@ -95,6 +95,7 @@ function LoginForm(props) {
         ) : null}
       </Form.Group>
       <Button
+        type="submit" // so ENTER to submit form works
         value="login"
         className="m-2"
         variant="primary"

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/account")
+@RequestMapping("/api/account/")
 public class AccountController {
 
     private final JwtUserDetailsService jwtUserDetailsService;

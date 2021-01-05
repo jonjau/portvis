@@ -1,7 +1,20 @@
 import React from "react";
 import { Row, Container, Badge } from "react-bootstrap";
 
-function StockComponent(props) {
+interface Stock {
+    name: string;
+    description: string;
+    symbol: string;
+    assetType: string;
+    sector: string;
+    industry: string;
+}
+
+interface Props {
+  searchedStock: Stock;
+}
+
+const StockComponent = (props: Props) => {
   const stock = props.searchedStock;
 
   return (
@@ -13,7 +26,7 @@ function StockComponent(props) {
               <>
                 <h1>
                   <Badge variant="dark">{stock.symbol}</Badge>
-                  &nbsp; {stock.Name}
+                  &nbsp; {stock.name}
                 </h1>
                 <h3 className="text-muted">
                   {stock.sector} | {stock.industry}
