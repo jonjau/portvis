@@ -24,6 +24,7 @@ import { Portfolio } from "../../models/Portfolio";
 
 const DEFAULT_CONFIG: ChartConfiguration = {
   type: "line",
+  
   data: {},
   options: {
     responsive: true,
