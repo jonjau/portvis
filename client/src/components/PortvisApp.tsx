@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Redirect,
   Route,
+  RouteComponentProps,
   Switch,
 } from "react-router-dom";
 
@@ -23,6 +24,7 @@ import { useEffect } from "react";
 import Account from "./Account";
 import Loading from "./Loading";
 import Error from "./Error";
+import { StockSearchResult } from "../models/StockSearchResult";
 
 const PrivateRoute = ({ ...props }) => {
   useEffect(() => {
@@ -41,26 +43,27 @@ const PrivateRoute = ({ ...props }) => {
   ) : (
     <Redirect to="/login/" />
   );
-}
+};
 
 const PortvisApp = () => {
   // TODO: consider React Context or Redux
-  const [searchedStock, setSearchedStock] = useState(null);
+  const [searchedStock, setSearchedStock] = useState<StockSearchResult | null>(
+    null
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [username, setUsername] = useState("");
 
-  const handleStockSearch = (symbol) => {
-    SearchService.getCompany(symbol)
-      .then((response) => {
-        console.log(response.data);
-        if (!response.data.symbol) {
-          // if stock not found, back end will send 200 with null fields.
-          alert("Stock not found.")
-        } else {
-          setSearchedStock(response.data);
-        }
-      });
-  }
+  const handleStockSearch = (symbol: string) => {
+    SearchService.getCompany(symbol).then((response) => {
+      console.log(response.data);
+      if (!response.data.symbol) {
+        // if stock not found, back end will send 200 with null fields.
+        alert("Stock not found.");
+      } else {
+        setSearchedStock(response.data);
+      }
+    });
+  };
 
   // refactor the PrivateRoute stuff soon
   return (
@@ -78,7 +81,7 @@ const PortvisApp = () => {
               username={username}
               setUsername={setUsername}
               path="/portfolios/"
-              render={(props) => (
+              render={(props: RouteComponentProps<{ portfolioId: string }>) => (
                 <Portfolios username={username} {...props} />
               )}
               // {/* component={PortfolioComponent} */}
@@ -89,8 +92,8 @@ const PortvisApp = () => {
               username={username}
               setUsername={setUsername}
               path="/backtest/"
-              render={(props) => (
-                <Backtest username={username} {...props} />
+              render={() => (
+                <Backtest />
               )}
               // {/* component={BacktestComponent} */}
             />
@@ -100,7 +103,7 @@ const PortvisApp = () => {
               username={username}
               setUsername={setUsername}
               path="/stocks/"
-              render={(props) => (
+              render={(props: RouteComponentProps) => (
                 <Stocks searchedStock={searchedStock} {...props} />
               )}
             />
@@ -110,11 +113,7 @@ const PortvisApp = () => {
               username={username}
               setUsername={setUsername}
               path="/account/"
-              render={(props) => (
-                <Account
-                  {...props}
-                />
-              )}
+              render={(props: RouteComponentProps) => <Account {...props} />}
             />
             <PrivateRoute
               isLoggedIn={isLoggedIn}
@@ -122,15 +121,9 @@ const PortvisApp = () => {
               username={username}
               setUsername={setUsername}
               path="/about/"
-              render={(props) => (
-                <About
-                  {...props}
-                />
-              )}
+              render={() => <About />}
             />
-            <Route
-              component={Error}
-            />
+            <Route component={Error} />
           </Switch>
         </div>
         <footer className="bg-dark text-center">
@@ -146,6 +139,6 @@ const PortvisApp = () => {
       </Router>
     </>
   );
-}
+};
 
 export default PortvisApp;

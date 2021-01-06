@@ -1,11 +1,10 @@
 import axios from "axios";
-import { Moment } from "moment";
 import { PORTVIS_API_URL } from "../constants";
 
 const axiosInstance = axios.create({withCredentials: true});
 
 class BacktestService {
-  getReturns(portfolioIds: number[], startDate: Moment, endDate: Moment) {
+  getReturns(portfolioIds: string[], startDate: string, endDate: string) {
     // URL encoding of multiple IDs: id:[4,5] -> id=4%2C5 ("," becomes %2C)
     // Jackson (the deserializer in the Spring backend) is able to
     // interpret this as a Java List<Long>. id=4&id=5 is also understood.

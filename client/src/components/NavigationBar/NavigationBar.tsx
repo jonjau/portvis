@@ -4,7 +4,11 @@ import { LinkContainer } from "react-router-bootstrap";
 
 import StockSearch from "./StockSearch";
 
-function NavigationBar(props) {
+interface Props {
+  handleStockSearch: (symbol: string) => void;
+}
+
+const NavigationBar = (props: Props) => {
 
   return (
     <Navbar sticky="top" bg="dark" variant="dark">

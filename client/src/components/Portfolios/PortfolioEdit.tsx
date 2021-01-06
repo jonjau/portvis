@@ -5,8 +5,16 @@ import AssetForm from "./AssetForm";
 import PortfolioDetailsForm from "./PortfolioDetailsForm";
 
 import _ from "lodash";
+import { Allocation, Portfolio } from "../../models/Portfolio";
 
-function PortfolioEditComponent(props) {
+interface Props {
+  currentPortfolio: Portfolio;
+  addAssetClicked: (newAsset: Allocation) => void;
+  deleteAssetClicked: (assetSymbol: string) => void;
+  portfolioDetailsSubmitted: (portfolioDetails: Portfolio) => void;
+}
+
+const PortfolioEdit = (props: Props) => {
   // this.props or props are undefined in contructor(props).
   // In render they aren't. Also, setting state in componentDidUpdate is a
   // bad idea. Google "react you probably don't need derived state".
@@ -17,7 +25,7 @@ function PortfolioEditComponent(props) {
     deleteAssetClicked,
     portfolioDetailsSubmitted,
   } = props;
-  // Doesn't have to be called submitAction
+
   return (
     <>
       <Row>
@@ -76,4 +84,4 @@ function PortfolioEditComponent(props) {
   );
 }
 
-export default PortfolioEditComponent;
+export default PortfolioEdit;

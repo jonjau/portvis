@@ -4,18 +4,21 @@ import { Row, Container, Jumbotron, Modal, Button } from "react-bootstrap";
 import RegisterService from "../../services/RegisterService";
 import LoginService from "../../services/LoginService";
 import LoginForm from "./LoginForm";
+import { RouteComponentProps } from "react-router-dom";
+import { LoginDetails } from "../../models/AccountDetails";
 
-function LoginComponent(props) {
+
+const LoginComponent = (props: RouteComponentProps) => {
   const [registerError, setRegisterError] = useState(false);
   const [registerErrorMessage, setRegisterErrorMessage] = useState("");
   const [loginError, setLoginError] = useState(false);
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
-  const register = (username, password) => {
-    RegisterService.register(username, password)
+  const register = ({username, password}: LoginDetails) => {
+    RegisterService.register({username, password})
       .then((_response) => {
         // successful registration is immediately followed by auto-login
-        login(username, password);
+        login({username, password});
       })
       .catch((err) => {
         if (err.response) {
@@ -34,8 +37,8 @@ function LoginComponent(props) {
       });
   };
 
-  const login = (username, password) => {
-    LoginService.login(username, password)
+  const login = ({username, password}: LoginDetails) => {
+    LoginService.login({username, password})
       .then((_response) => {
         // redirect to portfolios page
         props.history.push("/portfolios/");

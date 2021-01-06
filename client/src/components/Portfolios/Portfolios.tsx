@@ -8,40 +8,59 @@ import {
   ButtonGroup,
   Alert,
 } from "react-bootstrap";
-import PortfolioEditComponent from "./PortfolioEdit";
+import PortfolioEdit from "./PortfolioEdit";
 import PortfolioService from "../../services/PortfolioService";
 import SearchService from "../../services/SearchService";
-import { Route } from "react-router-dom";
+import { Route, RouteComponentProps } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
 import _ from "lodash";
 import RefreshIcon from "../icons/RefreshIcon";
 import LeftArrow from "../icons/LeftArrow";
+import {
+  Allocation,
+  Portfolio,
+  PortfolioDetails,
+} from "../../models/Portfolio";
 
-class PortfolioComponent extends Component {
+interface MatchParams {
+  portfolioId: string;
+}
+
+interface Props extends RouteComponentProps<MatchParams> {
+  username: string;
+}
+
+interface State {
+  portfolios: {
+    [id: string]: Portfolio;
+  };
+  currentPortfolioId: string;
+}
+
+class PortfolioComponent extends Component<Props, State> {
   // FIXME: check if stocks exist! a better check than the current crude one
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
-      portfolios: new Map(),
+      // map portfolio ids to the portfolios
+      portfolios: {},
       currentPortfolioId: this.props.match.params.portfolioId,
     };
     this.refreshPortfolios = this.refreshPortfolios.bind(this);
     this.getCurrentPortfolio = this.getCurrentPortfolio.bind(this);
 
-    this.deleteAssetClicked = this.deleteAssetClicked.bind(this);
-    this.addAssetClicked = this.addAssetClicked.bind(this);
-    this.portfolioDetailsSubmitted = this.portfolioDetailsSubmitted.bind(this);
+    this.deleteAsset = this.deleteAsset.bind(this);
+    this.addAsset = this.addAsset.bind(this);
+    this.submitPortfolioDetails = this.submitPortfolioDetails.bind(this);
 
-    this.savePortfolioClicked = this.savePortfolioClicked.bind(this);
-    this.deletePortfolioClicked = this.deletePortfolioClicked.bind(this);
-    this.addPortfolioClicked = this.addPortfolioClicked.bind(this);
-    this.deleteAllPortfoliosClicked = this.deleteAllPortfoliosClicked.bind(
-      this
-    );
+    this.savePortfolio = this.savePortfolio.bind(this);
+    this.deletePortfolio = this.deletePortfolio.bind(this);
+    this.addPortfolio = this.addPortfolio.bind(this);
+    this.deleteAllPortfolios = this.deleteAllPortfolios.bind(this);
 
-    this.isPortfolioFullyAllocated = this.isPortfolioFullyAllocated.bind(this);
-    this.doesPortfolioContainOnlyExistentAssets = this.doesPortfolioContainOnlyExistentAssets.bind(
+    this.isFullyAllocated = this.isFullyAllocated.bind(this);
+    this.containsOnlyExistentAssets = this.containsOnlyExistentAssets.bind(
       this
     );
   }
@@ -52,14 +71,11 @@ class PortfolioComponent extends Component {
 
   componentDidUpdate() {}
 
-  getCurrentPortfolio(portfolioId) {
+  getCurrentPortfolio(portfolioId: string): Portfolio {
     // assumes portfolioId is a NUMBER and portfolioId's are unique
-    const currentPortfolio = this.state.portfolios.filter(
+    const currentPortfolio = Object.values(this.state.portfolios).filter(
       (portfolio) => portfolio.id === portfolioId
     )[0];
-    // console.log(
-    //   `portfolio comp currport: ${JSON.stringify(currentPortfolio, null, 2)}`
-    // );
     return currentPortfolio;
   }
 
@@ -69,57 +85,55 @@ class PortfolioComponent extends Component {
         //console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
         // make a map so lookup by id is easier
         this.setState({
-          portfolios: new Map(response.data.map((p) => [p.id, p])),
+          portfolios: Object.fromEntries(response.data.map((p) => [p.id, p])),
         });
       })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
+      .catch((error) => {
+        alert("Failed to refresh portfolios.");
+        console.log(`error: ${JSON.stringify(error, null, 2)}`);
+      });
   }
 
-  addAssetClicked(newAsset) {
+  addAsset(newAsset: Allocation): void {
     // never mutate state directly!
     const { symbol, proportion } = newAsset;
     const currId = this.state.currentPortfolioId;
-    const newPortfolios = new Map(this.state.portfolios);
+    const newPortfolios = { ...this.state.portfolios };
 
-    newPortfolios.get(currId).allocations[symbol] = proportion;
+    newPortfolios[currId].allocations[symbol] = proportion;
 
     this.setState({ portfolios: newPortfolios });
   }
 
-  deleteAssetClicked(assetSymbol) {
+  deleteAsset(assetSymbol: string): void {
     // assumes assets (their symbols) are unique
     const currId = this.state.currentPortfolioId;
-    const newPortfolios = new Map(this.state.portfolios);
-    delete newPortfolios.get(currId).allocations[assetSymbol];
+    const newPortfolios = { ...this.state.portfolios };
+    delete newPortfolios[currId].allocations[assetSymbol];
 
     this.setState({ portfolios: newPortfolios });
   }
 
-  portfolioDetailsSubmitted(portfolioDetails) {
-    const { portfolioName, initialValue } = portfolioDetails;
+  submitPortfolioDetails(portfolioDetails: Portfolio): void {
+    const { name, initialValue } = portfolioDetails;
     const currId = this.state.currentPortfolioId;
-    const newPortfolios = new Map(this.state.portfolios);
+    const newPortfolios = { ...this.state.portfolios };
 
-    newPortfolios.get(currId).name = portfolioName;
-    newPortfolios.get(currId).initialValue = initialValue;
-
-    this.setState({
-      name: portfolioDetails.portfolioName,
-      initialValue: portfolioDetails.initialValue,
-    });
+    newPortfolios[currId].name = name;
+    newPortfolios[currId].initialValue = initialValue;
   }
 
-  async savePortfolioClicked() {
+  savePortfolio(): void {
     const currId = this.state.currentPortfolioId;
-    console.log(this.state.portfolios);
 
-    PortfolioService.updatePortfolio(currId, this.state.portfolios.get(currId))
+    PortfolioService.updatePortfolio(
+      Number(currId),
+      this.state.portfolios[currId]
+    )
       .then((response) => {
-        if (!_.isEqual(response.data, this.state.portfolios.get(currId))) {
-          console.log(response.data);
-          console.log(this.state.portfolios.get(currId));
+        if (!_.isEqual(response.data, this.state.portfolios[currId])) {
+          // console.log(response.data);
+          // console.log(this.state.portfolios[currId]);
           alert("Portfolio was not succesfully updated.");
         }
         this.refreshPortfolios();
@@ -130,12 +144,12 @@ class PortfolioComponent extends Component {
       });
   }
 
-  deletePortfolioClicked() {
+  deletePortfolio(): void {
     const currId = this.state.currentPortfolioId;
-    PortfolioService.deletePortfolio(currId)
+    PortfolioService.deletePortfolio(Number(currId))
       .then((response) => {
         if (response.data.deleted === true) {
-          this.setState({ currentPortfolioId: null });
+          this.setState({ currentPortfolioId: "" });
           this.props.history.push(`/portfolios/`);
         } else {
           alert("Portfolio was not successfully deleted.");
@@ -148,28 +162,22 @@ class PortfolioComponent extends Component {
       });
   }
 
-  addPortfolioClicked() {
-    const newPortfolio = {
+  addPortfolio() {
+    const newPortfolio: PortfolioDetails = {
       username: this.props.username,
       name: "",
       initialValue: 1000,
       allocations: { MSFT: 1.0 },
     };
-    console.log(this.props.username);
-    console.log(`${this.props.match.path}`);
     PortfolioService.addPortfolio(newPortfolio)
       .then((response) => {
-        // what is this condition for??
-        if (_.has(response.data, "id")) {
-          // the following lines are likely wrong...
-          const currId = newPortfolio.id;
-          console.log(this.state);
-          this.setState({ currentPortfolioId: currId });
-          this.props.history.push(`/portfolios/${currId}`);
-        } else {
-          // necessary?
-          alert("Portfolio was not successfully added.");
-        }
+        const addedPortfolio = response.data;
+        const currId = addedPortfolio.id;
+        this.setState((prevState) => ({
+          portfolios: { ...prevState.portfolios, [currId]: addedPortfolio },
+          currentPortfolioId: currId,
+        }));
+        this.props.history.push(`/portfolios/${currId}`);
         this.refreshPortfolios();
       })
       .catch((error) => {
@@ -178,15 +186,11 @@ class PortfolioComponent extends Component {
       });
   }
 
-  deleteAllPortfoliosClicked() {
+  deleteAllPortfolios(): void {
     PortfolioService.deleteAllPortfolios()
       .then((response) => {
-        if (response.data.deleted === true) {
-          this.setState({ currentPortfolioId: null });
-          this.props.history.push(`/portfolios/`);
-        } else {
-          alert("Portfolios were not successfully deleted.");
-        }
+        this.setState({ currentPortfolioId: ""});
+        this.props.history.push(`/portfolios/`);
         this.refreshPortfolios();
       })
       .catch((error) => {
@@ -195,16 +199,17 @@ class PortfolioComponent extends Component {
       });
   }
 
-  isPortfolioFullyAllocated() {
+  isFullyAllocated() {
     const { portfolios, currentPortfolioId: currId } = this.state;
-    return _.sum(Object.values(portfolios.get(currId).allocations)) === 1.0;
+    return _.sum(Object.values(portfolios[currId].allocations)) === 1.0;
   }
 
-  // this should work, how does one render things based on async state updates?
-  async doesPortfolioContainOnlyExistentAssets() {
+  // this should work but it doesn't,
+  // how do you render things based on async state updates?
+  async containsOnlyExistentAssets() {
     const { portfolios, currentPortfolioId } = this.state;
     const companyNames = Object.keys(
-      portfolios.get(currentPortfolioId).allocations
+      portfolios[currentPortfolioId].allocations
     );
     const exists = await Promise.all(
       companyNames.map(
@@ -223,9 +228,9 @@ class PortfolioComponent extends Component {
       <Row>
         <Col md="2" className="bg-secondary p-2 min-vh-100">
           <Nav as={ListGroup} className="flex-column">
-            <ListGroup.Item disable="true" variant="secondary">
+            <ListGroup.Item variant="secondary">
               <ButtonGroup>
-                <Button className="btn-info" onClick={this.addPortfolioClicked}>
+                <Button className="btn-info" onClick={this.addPortfolio}>
                   Add new portfolio
                 </Button>
                 <Button variant="warning" onClick={this.refreshPortfolios}>
@@ -233,7 +238,7 @@ class PortfolioComponent extends Component {
                 </Button>
               </ButtonGroup>
             </ListGroup.Item>
-            {Array.from(portfolios.values()).map((portfolio) => (
+            {Object.values(portfolios).map((portfolio) => (
               <LinkContainer
                 to={`/portfolios/${portfolio.id}/`}
                 key={portfolio.id}
@@ -252,11 +257,8 @@ class PortfolioComponent extends Component {
                 </Nav.Link>
               </LinkContainer>
             ))}
-            <ListGroup.Item disable="true" variant="secondary">
-              <Button
-                variant="danger"
-                onClick={this.deleteAllPortfoliosClicked}
-              >
+            <ListGroup.Item variant="secondary">
+              <Button variant="danger" onClick={this.deleteAllPortfolios}>
                 Delete all portfolios
               </Button>
             </ListGroup.Item>
@@ -272,13 +274,13 @@ class PortfolioComponent extends Component {
                   // instead of using higher order components, we can do
                   // {...props}
                   // to pass some (not all!) props to a Component
-                  <PortfolioEditComponent
-                    portfolioDetailsSubmitted={this.portfolioDetailsSubmitted}
-                    deleteAssetClicked={this.deleteAssetClicked}
-                    addAssetClicked={this.addAssetClicked}
-                    currentPortfolio={this.state.portfolios.get(
-                      this.state.currentPortfolioId
-                    )}
+                  <PortfolioEdit
+                    portfolioDetailsSubmitted={this.submitPortfolioDetails}
+                    deleteAssetClicked={this.deleteAsset}
+                    addAssetClicked={this.addAsset}
+                    currentPortfolio={
+                      this.state.portfolios[this.state.currentPortfolioId]
+                    }
                     {...props}
                   />
                 )}
@@ -286,21 +288,20 @@ class PortfolioComponent extends Component {
               <Row>
                 <Button
                   className="m-2 btn-success"
-                  onClick={this.savePortfolioClicked}
+                  onClick={this.savePortfolio}
                   disabled={
-                    !this.isPortfolioFullyAllocated() ||
-                    !this.doesPortfolioContainOnlyExistentAssets
+                    !this.isFullyAllocated() || !this.containsOnlyExistentAssets
                   }
                 >
                   Save changes to portfolio
                 </Button>
                 <Button
                   className="m-2 btn-danger"
-                  onClick={this.deletePortfolioClicked}
+                  onClick={this.deletePortfolio}
                 >
                   Delete this portfolio
                 </Button>
-                {this.isPortfolioFullyAllocated() ? null : (
+                {this.isFullyAllocated() ? null : (
                   <Alert variant="warning" className="m-2">
                     Total portfolio allocation must be exactly 100%. Adjust
                     assets to reach 100% total allocation before saving changes.

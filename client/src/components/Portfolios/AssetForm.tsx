@@ -12,8 +12,15 @@ import {
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Allocation } from "../../models/Portfolio";
 
-function AssetForm(props) {
+interface Props {
+  assetSymbols: string[];
+  totalAllocation: number;
+  submitAction: (newAsset: Allocation) => void;
+}
+
+const AssetForm = (props: Props) => {
   const formik = useFormik({
     initialValues: {
       symbol: "",
@@ -26,9 +33,11 @@ function AssetForm(props) {
         .test(
           "duplicate-asset-test",
           `Asset already exists in portfolio`,
-          function (submittedSymbol) {
+          (submittedSymbol: string | null | undefined ): boolean => {
+            // if somehow submittedSymbol is not actually a string, just force
+            // a fail by checking for a nonsensical symbol.
             // true if valid, false if error
-            return !props.assetSymbols.includes(submittedSymbol);
+            return !props.assetSymbols.includes(submittedSymbol ?? "");
           }
         ),
       proportion: Yup.number()
@@ -39,9 +48,11 @@ function AssetForm(props) {
         .test(
           "allocation-limit-test",
           `Total allocation proportion must not exceed 100% of portfolio`,
-          function (submittedProportion) {
+          (submittedProportion: number | null | undefined): boolean => {
+            // if somehow submittedProportion is not actually a number, just
+            // force a fail by defaulting to 2 (anything larger than 1.0).
             // true if valid, false if error
-            return props.totalAllocation + submittedProportion <= 1.0;
+            return props.totalAllocation + (submittedProportion ?? 2) <= 1.0;
           }
         ),
     }),

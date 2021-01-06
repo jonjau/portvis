@@ -1,17 +1,9 @@
 import React from "react";
 import { Row, Container, Badge } from "react-bootstrap";
-
-interface Stock {
-    name: string;
-    description: string;
-    symbol: string;
-    assetType: string;
-    sector: string;
-    industry: string;
-}
+import { StockSearchResult } from "../models/StockSearchResult";
 
 interface Props {
-  searchedStock: Stock;
+  searchedStock: StockSearchResult | null;
 }
 
 const StockComponent = (props: Props) => {

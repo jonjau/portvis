@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Component wrapper that returns a refresh icon from Bootstrap's icon set.
  */
