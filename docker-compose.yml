@@ -1,7 +1,7 @@
 version: "3.9"
 services: 
 
-  portvis-db:
+  database:
     container_name: portvis-db
     image: mysql:8
     environment: 
@@ -10,20 +10,28 @@ services:
       MYSQL_PASSWORD: portvis
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - 3306:3306
+      - "3306:3306"
 
-  portvis-client:
+  server:
+    container_name: portvis-server
+    build: ./server
+    environment: 
+      # Spring boot is expecting database:3306
+      MYSQL_DB_HOST: database
+      MYSQL_DB_PORT: 3306
+
+      MYSQL_DB_NAME: portvisdb
+      MYSQL_DB_USERNAME: portvis
+      MYSQL_DB_PASSWORD: portvis
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+
+  client:
     container_name: portvis-client
     build: ./client
     ports:
-      - 3000:80
+      - "3000:80"
     depends_on:
-      - portvis-server
-
-  portvis-server:
-    container_name: portvis-server
-    build: ./server
-    ports:
-      - 8080:8080
-    depends_on:
-      - portvis-db
+      - server

@@ -4,8 +4,14 @@ import { Row, Col, Card, Form, FormControl, InputGroup } from "react-bootstrap";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Portfolio } from "../../models/Portfolio";
 
-function PortfolioDetailsForm(props) {
+interface Props {
+  currentPortfolio: Portfolio;
+  submitAction: (portfolioDetails: Portfolio) => void;
+}
+
+const PortfolioDetailsForm = (props: Props) => {
   // this is a React hook, basically state for functional components
   const formik = useFormik({
     // initial values are derived from props
@@ -33,7 +39,8 @@ function PortfolioDetailsForm(props) {
     onSubmit: (values) => {
       // convert initial value to number before passing it on to submitAction
       props.submitAction({
-        portfolioName: values.portfolioName,
+        ...props.currentPortfolio,
+        name: values.portfolioName,
         initialValue: Number(values.initialValue),
       });
     },
@@ -59,7 +66,7 @@ function PortfolioDetailsForm(props) {
                 <Form.Control
                   id="inputPortfolioName"
                   name="portfolioName"
-                  value={formik.values.portfolioName}
+                  value={formik.values.portfolioName || ""}
                   onChange={formik.handleChange}
                 />
               </InputGroup>
@@ -81,7 +88,7 @@ function PortfolioDetailsForm(props) {
                 <FormControl
                   id="inputInitialValue"
                   name="initialValue"
-                  value={formik.values.initialValue}
+                  value={formik.values.initialValue || 0}
                   onChange={formik.handleChange}
                 />
               </InputGroup>

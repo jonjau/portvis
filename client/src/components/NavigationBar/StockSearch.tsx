@@ -6,22 +6,32 @@ import { Button, Form } from "react-bootstrap";
 import SearchService from "../../services/SearchService";
 import { useHistory } from "react-router-dom";
 
-function StockSearch(props) {
-  const [, setIsLoading] = useState(false);
-  const [options, setOptions] = useState([]);
+interface StockSearchOption {
+  symbol: string;
+  name: string;
+}
 
-  const ref = useRef();
+interface Props {
+  handleStockSearch: (symbol: string) => void;
+}
+
+const StockSearch = (props: Props) => {
+  const [, setIsLoading] = useState(false);
+  const [options, setOptions] = useState<StockSearchOption[]>([]);
+
+  const ref = useRef<AsyncTypeahead<StockSearchOption>>(null);
   const history = useHistory();
 
-  const handleSearch = (query) => {
+  const handleSearch = (query: string) => {
     setIsLoading(true);
 
     SearchService.getSymbols(query).then((response) => {
-      const options = response.data.bestMatches.map((result) => ({
-        symbol: String(result.symbol),
-        name: String(result.name),
-        //symbol_and_name: String(result.symbol) + String(result.name),
-      }));
+      const options: StockSearchOption[] = response.data.bestMatches.map(
+        (result) => ({
+          symbol: String(result.symbol),
+          name: String(result.name),
+        })
+      );
 
       setOptions(options);
       setIsLoading(false);
@@ -29,8 +39,9 @@ function StockSearch(props) {
   };
 
   const handleSubmit = () => {
-    const symbol = ref.current.state.text;
-    history.push("/stocks/")
+    // nasty
+    const symbol = (ref?.current?.state as any).text;
+    history.push("/stocks/");
     props.handleStockSearch(symbol);
   };
 
@@ -40,12 +51,11 @@ function StockSearch(props) {
         id="stock-search"
         isLoading={false}
         ref={ref}
-        className="m-2"
         labelKey="symbol"
         onSearch={handleSearch}
         options={options}
         placeholder="Search for a US stock..."
-        renderMenuItemChildren={(option, props) => (
+        renderMenuItemChildren={(option, _props) => (
           <div>
             {option.symbol} ({option.name})
           </div>
@@ -56,6 +66,6 @@ function StockSearch(props) {
       </Button>
     </Form>
   );
-}
+};
 
 export default StockSearch;

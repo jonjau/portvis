@@ -4,19 +4,26 @@ import { Row, Col, Button, Form, InputGroup } from "react-bootstrap";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { LoginDetails } from "../../models/AccountDetails";
 
-// TODO: consider TypeScript Enums
-const LOGIN = "login";
-const REGISTER = "register";
+enum SubmitType {
+  Login,
+  Register,
+}
 
-function LoginForm(props) {
+interface Props {
+  loginAction: (loginDetails: LoginDetails) => void;
+  registerAction: (loginDetails: LoginDetails) => void;
+}
+
+function LoginForm(props: Props) {
   const [passwordShow, setPasswordShow] = useState(false);
 
   const formik = useFormik({
     initialValues: {
       username: "",
       password: "",
-      submissionType: LOGIN,
+      submissionType: SubmitType.Login,
     },
 
     validationSchema: Yup.object({
@@ -34,12 +41,12 @@ function LoginForm(props) {
     }),
 
     onSubmit: (values) => {
-      if (values.submissionType === REGISTER) {
+      if (values.submissionType === SubmitType.Register) {
         props.registerAction({
           username: values.username,
           password: values.password,
         });
-      } else if (values.submissionType === LOGIN) {
+      } else if (values.submissionType === SubmitType.Login) {
         props.loginAction({
           username: values.username,
           password: values.password,
@@ -100,9 +107,11 @@ function LoginForm(props) {
         className="m-2"
         variant="primary"
         onClick={() => {
-          formik.setFieldValue("submissionType", LOGIN).then(() => {
-            formik.handleSubmit();
-          });
+          // technically not correct since setting field value directly
+          // is async and should return a callable Promise:
+          // form might be submitted before the submissionType has changed
+          formik.setFieldValue("submissionType", SubmitType.Login, false);
+          formik.handleSubmit();
         }}
       >
         Login
@@ -112,9 +121,9 @@ function LoginForm(props) {
         className="m-2"
         variant="secondary"
         onClick={() => {
-          formik.setFieldValue("submissionType", REGISTER).then(() => {
-            formik.handleSubmit();
-          });
+          // same hack
+          formik.setFieldValue("submissionType", SubmitType.Register, false);
+          formik.handleSubmit();
         }}
       >
         Register

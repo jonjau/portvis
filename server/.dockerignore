@@ -2,3 +2,13 @@
 target/
 .dockerignore
 Dockerfile
+
+1. Sign up
+2. Create security group
+3. Create a key pair (.pem)
+4. Create an EC2 instance
+5. Connect to the EC2 instance using SSH
+	
+
+	
+5. ssh -i /path/my-key-pair.pem my-instance-user-name@my-instance-public-dns-name

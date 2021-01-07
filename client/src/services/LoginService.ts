@@ -1,22 +1,26 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { PORTVIS_API_URL } from "../constants";
+import { LoginDetails } from "../models/AccountDetails";
 
 const loginEndpoint = `${PORTVIS_API_URL}/login/`;
 
 const axiosInstance = axios.create({withCredentials: true});
 
-interface LoginDetails {
+interface LoginResponse {
+  jwtToken: string;
+}
+
+interface IsLoggedInResponse {
   username: string;
-  password: string;
 }
 
 class LoginService {
 
-  login(user: LoginDetails) {
+  login(user: LoginDetails): Promise<AxiosResponse<LoginResponse>> {
     return axiosInstance.post(`${loginEndpoint}`, user);
   }
 
-  isLoggedIn() {
+  isLoggedIn(): Promise<AxiosResponse<IsLoggedInResponse>> {
     return axiosInstance.get(`${loginEndpoint}`);
   }
 }

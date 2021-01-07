@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, RefObject } from "react";
 import {
   Row,
   Col,
@@ -17,25 +17,86 @@ import RemarksCard from "./RemarksCard";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import Chart from "chart.js";
-import moment from "moment";
-//import "chartjs-adapter-moment";
+import Chart, { ChartConfiguration } from "chart.js";
+import moment, { Moment } from "moment";
 import _ from "lodash";
+import { Portfolio } from "../../models/Portfolio";
 
-class BacktestComponent extends Component {
-  constructor(props) {
+const DEFAULT_CONFIG: ChartConfiguration = {
+  type: "line",
+  
+  data: {},
+  options: {
+    responsive: true,
+    title: {
+      display: true,
+      text: "Select portfolios to backtest!",
+    },
+    tooltips: {
+      position: "nearest",
+      mode: "index",
+      intersect: false,
+    },
+    scales: {
+      xAxes: [
+        {
+          type: "time",
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: "Date",
+          },
+          time: {
+            unit: "day",
+          },
+        },
+      ],
+      yAxes: [
+        {
+          ticks: {
+            //beginAtZero: true,
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: "Price (USD)",
+          },
+        },
+      ],
+    },
+  },
+};
+
+interface Props {}
+
+interface State {
+  portfolios: {
+    [id: string]: Portfolio;
+  };
+  selectedPortfolioIds: string[];
+  startDate: Moment;
+  endDate: Moment;
+  chartData: number[][];
+  loading: boolean;
+}
+
+class BacktestComponent extends Component<Props, State> {
+  chartColors: string[];
+  chartRef: RefObject<HTMLCanvasElement>;
+  chart: Chart | null = null;
+
+  constructor(props: Props) {
     super(props);
 
     this.state = {
-      stockHistory: [],
-      portfolios: new Map(),
+      portfolios: {},
       selectedPortfolioIds: [],
       startDate: moment().subtract(24, "days"),
       endDate: moment().subtract(3, "days"),
       chartData: [],
       loading: false,
     };
-    this.chartRef = React.createRef();
+    this.chartRef = React.createRef<HTMLCanvasElement>();
     this.chartColors = [
       "SteelBlue",
       "Orange",
@@ -65,26 +126,26 @@ class BacktestComponent extends Component {
   refreshPortfolios() {
     PortfolioService.getAllPortfolios()
       .then((response) => {
-        //console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
-        // make a map so lookup by id is easier
+        // console.log(`received: ${JSON.stringify(response.data, null, 2)}`);
         this.setState({
-          portfolios: new Map(
+          portfolios: Object.fromEntries(
             response.data.map((portfolio) => [portfolio.id, portfolio])
           ),
         });
       })
-      .catch((error) =>
-        console.log(`error: ${JSON.stringify(error, null, 2)}`)
-      );
+      .catch((error) => {
+        alert("Failed to refresh portfolios.");
+        console.log(`error: ${JSON.stringify(error, null, 2)}`);
+      });
   }
 
-  selectPortfolio(id) {
+  selectPortfolio(id: string): void {
     this.setState((prevState) => ({
       selectedPortfolioIds: [...prevState.selectedPortfolioIds, id],
     }));
   }
 
-  deselectPortfolio(id) {
+  deselectPortfolio(id: string): void {
     this.setState((prevState) => ({
       selectedPortfolioIds: prevState.selectedPortfolioIds.filter(
         (currId) => currId !== id
@@ -96,7 +157,7 @@ class BacktestComponent extends Component {
     const portfolioIds = this.state.selectedPortfolioIds;
     const startDate = this.state.startDate.format("YYYY-MM-DD");
     const endDate = this.state.endDate.format("YYYY-MM-DD");
-    this.setState({loading: true}, () => {
+    this.setState({ loading: true }, () => {
       BacktestService.getReturns(portfolioIds, startDate, endDate)
         .then((response) => {
           this.setState({ chartData: response.data, loading: false });
@@ -107,25 +168,23 @@ class BacktestComponent extends Component {
           alert("An error occurred when trying to backtest the portfolios.");
           console.log(`error: ${JSON.stringify(error, null, 2)}`);
         });
-    })
+    });
   }
 
   plotChart() {
+    // no need to sort, chart.js can work it out
     const dates = Object.keys(this.state.chartData).map(
       (dateString) => new Date(dateString)
     );
-    //.sort((date1, date2) => date1 - date2);
 
     // price data for each portfolio
     const priceData = this.state.selectedPortfolioIds.map((id, i) => {
       const priceDataForOnePortfolio = {
-        portfolio: this.state.portfolios.get(id),
+        portfolio: this.state.portfolios[id],
         returns: Object.values(this.state.chartData).map((prices) => prices[i]),
       };
       return priceDataForOnePortfolio;
     });
-
-    //console.log(priceData);
 
     const datasets = this.state.selectedPortfolioIds.map((_, i) => {
       const dataset = {
@@ -139,62 +198,16 @@ class BacktestComponent extends Component {
       return dataset;
     });
 
-    const startDate = this.state.startDate.format("YYYY-MM-DD");
-    const endDate = this.state.endDate.format("YYYY-MM-DD");
-
-    this.chart.options.title.text = `${startDate} to ${endDate}`;
-    this.chart.data.labels = dates;
-    this.chart.data.datasets = [...datasets];
-    this.chart.update();
+    if (this.chart !== null) {
+      this.chart.data.labels = dates;
+      this.chart.data.datasets = [...datasets];
+      this.chart.update();
+    }
   }
 
-  initChart() {
-    const options = {
-      type: "line",
-      data: {},
-      options: {
-        fill: false,
-        responsive: true,
-        title: {
-          display: true,
-          text: "Select portfolios to backtest!",
-        },
-        tooltips: {
-          position: "nearest",
-          mode: "index",
-          intersect: false,
-        },
-        scales: {
-          xAxes: [
-            {
-              type: "time",
-              display: true,
-              scaleLabel: {
-                display: true,
-                labelString: "Date",
-              },
-              time: {
-                unit: "day",
-              },
-            },
-          ],
-          yAxes: [
-            {
-              ticks: {
-                //beginAtZero: true,
-              },
-              display: true,
-              scaleLabel: {
-                display: true,
-                labelString: "Price (USD)",
-              },
-            },
-          ],
-        },
-      },
-    };
+  initChart(): void {
     // string or context (ref)?
-    this.chart = new Chart("backtestChart", options);
+    this.chart = new Chart("backtestChart", DEFAULT_CONFIG);
   }
 
   render() {
@@ -202,7 +215,7 @@ class BacktestComponent extends Component {
       <Row>
         <Col md="3" className="bg-secondary p-2 min-vh-100">
           <ListGroup>
-            <ListGroup.Item align="center" disable="true" variant="secondary">
+            <ListGroup.Item variant="secondary">
               <Row>
                 <Col className="d-flex justify-content-center">
                   <ButtonGroup className="p-2">
@@ -229,7 +242,7 @@ class BacktestComponent extends Component {
                     closeOnScroll={true}
                     selected={this.state.startDate.toDate()}
                     onChange={(date) =>
-                      this.setState({ startDate: moment(date) })
+                      this.setState({ startDate: moment(date as Date) })
                     }
                     //minDate={
                     maxDate={this.state.endDate.toDate()}
@@ -248,7 +261,7 @@ class BacktestComponent extends Component {
                     closeOnScroll={true}
                     selected={this.state.endDate.toDate()}
                     onChange={(date) =>
-                      this.setState({ endDate: moment(date) })
+                      this.setState({ endDate: moment(date as Date) })
                     }
                     minDate={this.state.startDate.toDate()}
                     maxDate={moment().subtract(2, "days").toDate()}
@@ -271,7 +284,7 @@ class BacktestComponent extends Component {
                     <Button
                       variant="outline-success"
                       onClick={() =>
-                        Array.from(this.state.portfolios.keys()).forEach((id) =>
+                        Object.keys(this.state.portfolios).forEach((id) =>
                           this.selectPortfolio(id)
                         )
                       }
@@ -281,7 +294,7 @@ class BacktestComponent extends Component {
                     <Button
                       variant="outline-danger"
                       onClick={() =>
-                        Array.from(this.state.portfolios.keys()).forEach((id) =>
+                        Object.keys(this.state.portfolios).forEach((id) =>
                           this.deselectPortfolio(id)
                         )
                       }
@@ -297,7 +310,7 @@ class BacktestComponent extends Component {
               </tr>
             </thead>
             <tbody>
-              {Array.from(this.state.portfolios.values()).map((portfolio) => (
+              {Object.values(this.state.portfolios).map((portfolio) => (
                 <tr className="d-flex" key={portfolio.id}>
                   <td className="col-8">
                     {`${_.truncate(portfolio.name, { length: 18 })}
