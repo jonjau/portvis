@@ -2,6 +2,9 @@ package com.jonjau.portvis.alphavantage.dto;
 
 import lombok.Data;
 
+/**
+ * An item in the response from the AlphaVantage symbol search endpoint.
+ */
 @Data
 public class SymbolSearchResultItem {
 

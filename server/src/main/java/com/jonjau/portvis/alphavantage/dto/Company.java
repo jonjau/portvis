@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+/**
+ * Response from the AlphaVantage company search endpoint.
+ */
 // ignore attributes/properties that have not been defined in this class
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data

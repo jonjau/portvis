@@ -5,6 +5,9 @@ import com.jonjau.portvis.alphavantage.AlphaVantageClient;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+/**
+ * User DTO, with javax.validation constraints and no ties to the Portfolio entity.
+ */
 @Data
 public class UserDto {
 

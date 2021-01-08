@@ -21,7 +21,6 @@ public class TimeSeriesController {
         this.client = new AlphaVantageClient();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = "/timeseries", params = {"symbol"})
     public TimeSeriesResult getDaily(
             @RequestParam("symbol") String symbol,

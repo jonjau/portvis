@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+/**
+ * Service responsible for fetching the symbol search results (used for the autocomplete
+ * functionality), as well as the company overview results.
+ */
 @Service
 public class SearchService {
     private final AlphaVantageClient client;
@@ -18,6 +22,9 @@ public class SearchService {
         this.client = client;
     }
 
+    /**
+     * Returns the best matches for the given keywords.
+     */
     public SymbolSearchResult getSymbolSearch(
             String keywords,
             String apiKey
@@ -26,6 +33,9 @@ public class SearchService {
         return client.getSymbolSearchResult(keywords, apiKey);
     }
 
+    /**
+     * Returns information about the company with the given symbol.
+     */
     public Company getCompanyOverview(
             String symbol,
             String apiKey

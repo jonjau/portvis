@@ -25,10 +25,9 @@ public class JwtTokenComponent {
 
 
     /**
-     * unit is milliseconds, so 5 hours
+     * How long JWT tokens are valid for: 5 hours by default
      */
-//    public static final long JWT_TOKEN_VALIDITY_MILLIS =5*60*60*1000;
-    public static final long JWT_TOKEN_VALIDITY_MILLIS =2*60*1000;
+    public static final long JWT_TOKEN_VALIDITY_MILLIS =5*60*60*1000;
 
     @Value("${jwt.secret}")
     private String secret;

@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Portfolio DTO, with javax.validation constraints and no ties to the User entity.
+ */
 @Data
 public class PortfolioDto {
     private long id;

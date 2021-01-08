@@ -1,9 +1,7 @@
 package com.jonjau.portvis.service;
 
-import com.jonjau.portvis.dto.PortfolioDto;
 import com.jonjau.portvis.exception.UserAlreadyExistsException;
 import com.jonjau.portvis.repository.UserRepository;
-import com.jonjau.portvis.repository.entity.Portfolio;
 import com.jonjau.portvis.repository.entity.User;
 import com.jonjau.portvis.dto.UserDto;
 import com.jonjau.portvis.util.JwtTokenComponent;
@@ -20,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
+/**
+ * Service responsible for user lookup, login, registration, and authentication.
+ */
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
 
@@ -48,11 +49,15 @@ public class JwtUserDetailsService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // As above
     @Autowired
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
+    /**
+     * Returns a JWT token for a given user.
+     */
     public String createAuthenticationToken(UserDto authenticationRequest) {
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = loadUserByUsername(
@@ -60,6 +65,10 @@ public class JwtUserDetailsService implements UserDetailsService {
         return jwtTokenComponent.generateToken(userDetails);
     }
 
+    /**
+     * Checks if the user (username/password pair) is authenticated, throwing an exception if the
+     * check fails.
+     */
     private void authenticate(String username, String password) throws AuthenticationException {
         // e.g. may throw BadCredentialsException (mostly this?), etc.
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -67,6 +76,13 @@ public class JwtUserDetailsService implements UserDetailsService {
         ));
     }
 
+    /**
+     * Finds a user with the given username and returning their details.
+     *
+     * @param username the username of the user to be searched for
+     * @return the user's details
+     * @throws UsernameNotFoundException if the user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDto userDto = getUser(username);
@@ -77,10 +93,24 @@ public class JwtUserDetailsService implements UserDetailsService {
         );
     }
 
+    /**
+     * Finds a User with the given username in the repository and return it as a UserDto.
+     *
+     * @param username the username of the user to be searched for
+     * @return the User as a UserDto
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public UserDto getUser(String username) throws UsernameNotFoundException {
         return toDto(findUser(username));
     }
 
+    /**
+     * Update a user's details. NOTE: the user's username must not have been changed.
+     * @param updatedUserDto the UserDto to override the current User stored (with the same
+     *                       username)
+     * @return the updated user as a UserDto
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public UserDto updateUser(UserDto updatedUserDto) throws UsernameNotFoundException {
         String username = updatedUserDto.getUsername();
         User user = findUser(username);
@@ -92,11 +122,22 @@ public class JwtUserDetailsService implements UserDetailsService {
         return toDto(updatedUser);
     }
 
+    /**
+     * Returns whether the user with the given username exists in the repository.
+     * @param username the username of the user to be searched for
+     */
     public boolean userExists(String username) {
         User user = userRepository.findByUsername(username);
         return user != null;
     }
 
+    /**
+     * Registers a user: adds them to the repository, with their passwords encrypted.
+     *
+     * @param user the user to be registered
+     * @return the registered user
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public UserDto registerUser(UserDto user) throws UserAlreadyExistsException {
         if (userExists(user.getUsername())) {
             throw new UserAlreadyExistsException(user.getUsername());

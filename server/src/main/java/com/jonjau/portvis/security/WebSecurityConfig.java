@@ -64,8 +64,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // We don't need CSRF for this example
         httpSecurity.cors().configurationSource(
                 request -> {
+                    // for development purposes allow CORS requests from :3000
+                    // this entire configuration section may be omitted in deployment
                     CorsConfiguration cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+                    cors.setAllowedOrigins(Arrays.asList(
+                            "http://localhost:3000", "http://localhost"));
                     cors.setAllowedMethods(Arrays.asList("GET", "POST","PUT", "DELETE", "OPTIONS"));
                     cors.setAllowedHeaders(Collections.singletonList("*"));
                     cors.setAllowCredentials(true);
@@ -80,8 +83,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers(HttpMethod.POST, "/api/register/").permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()
-                // make sure we use stateless session; session won't be used to
-                // store user's state.
+                // make sure we use stateless session; session won't be used to store user's state.
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

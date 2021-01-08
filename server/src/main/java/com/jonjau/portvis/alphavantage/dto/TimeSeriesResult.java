@@ -3,13 +3,14 @@ package com.jonjau.portvis.alphavantage.dto;
 import java.time.LocalDate;
 import java.util.Map;
 
-import com.jonjau.portvis.alphavantage.dto.MetaData;
-import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
 import lombok.Data;
 
+/**
+ * Response from the AlphaVantage time series data endpoint.
+ */
 @Data
 public class TimeSeriesResult {
 
     private MetaData metaData;
-    private Map<LocalDate, TimeSeriesData> timeSeries;
+    private Map<LocalDate, TimeSeriesResultItem> timeSeries;
 }

@@ -2,7 +2,7 @@ package com.jonjau.portvis.service;
 
 import com.jonjau.portvis.alphavantage.AlphaVantageClient;
 import com.jonjau.portvis.dto.PortfolioDto;
-import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
+import com.jonjau.portvis.alphavantage.dto.TimeSeriesResultItem;
 import com.jonjau.portvis.exception.MissingPriceInformationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,10 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service responsible for returning the calculated returns of portfolios over time, based on
+ * the stock price data retrieved from AlphaVantage.
+ */
 @Service
 public class BacktestService {
 
@@ -54,9 +58,9 @@ public class BacktestService {
         Map<String, BigDecimal> allocations = portfolio.getAllocations();
 
         // populate map, mapping each symbol to their prices over time.
-        Map<String, Map<LocalDate, TimeSeriesData>> assetPrices = new HashMap<>();
+        Map<String, Map<LocalDate, TimeSeriesResultItem>> assetPrices = new HashMap<>();
         for (String symbol : allocations.keySet()) {
-            Map<LocalDate, TimeSeriesData> data = client
+            Map<LocalDate, TimeSeriesResultItem> data = client
                     .getTimeSeriesResult(symbol, apiKey).getTimeSeries();
             assetPrices.put(symbol, data);
         }
@@ -117,7 +121,7 @@ public class BacktestService {
      * @param prices TimeSeriesData representing prices in a period.
      * @return the OHLC average.
      */
-    public BigDecimal getOHLCAverage(TimeSeriesData prices) {
+    public BigDecimal getOHLCAverage(TimeSeriesResultItem prices) {
         // Calculating mean of BigDecimals in Java...
         BigDecimal sum = new BigDecimal(0);
         sum = sum.add(prices.getOpen());

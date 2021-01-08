@@ -19,7 +19,6 @@ import java.util.Map;
 @RequestMapping("/api")
 public class PortfolioController {
 
-
     private PortfolioService portfolioService;
 
     @Autowired
@@ -27,7 +26,6 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    // trailing slash "/", stay consistent
     @GetMapping("/portfolios/")
     public List<PortfolioDto> getAllPortfolios(
             @RequestAttribute(name = "username") String username
