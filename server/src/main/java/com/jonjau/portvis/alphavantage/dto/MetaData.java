@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 
 import lombok.Data;
 
+/**
+ * MetaData portion of the response from the AlphaVantage time series data endpoint.
+ */
 @Data
 public class MetaData {
 

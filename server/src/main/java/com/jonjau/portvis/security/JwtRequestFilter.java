@@ -51,8 +51,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (jwtToken != null) {
             // Assuming the cookie containing the JWT has not yet expired in the request,
             // this code examining the JWT might throw IllegalArgumentException if JWT is
-            // illegal or ExpiredJwtException if the JWT (separate from the cookie) has expired
+            // illegal or ExpiredJwtException if the JWT (separate from the cookie) has expired.
             username = jwtTokenComponent.getUsernameFromToken(jwtToken);
+
             String apiKey= jwtUserDetailsService.getUser(username).getApiKey();
             request.setAttribute("username", username);
             request.setAttribute("apiKey", apiKey);

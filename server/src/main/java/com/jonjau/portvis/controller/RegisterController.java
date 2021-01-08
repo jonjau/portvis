@@ -25,7 +25,6 @@ public class RegisterController {
     public UserDto registerUser(
             @Valid @RequestBody UserDto user
     ) throws UserAlreadyExistsException {
-        System.out.println(user);
         // the password returned will be encrypted.
         return userDetailsService.registerUser(user);
     }

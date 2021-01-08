@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Template for an API error response sent by this server program.
+ */
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor

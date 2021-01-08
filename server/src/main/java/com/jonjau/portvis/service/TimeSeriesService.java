@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+/**
+ * Service responsible for fetching time series data.
+ */
 @Service
 public class TimeSeriesService {
 
@@ -17,6 +20,9 @@ public class TimeSeriesService {
         this.client = client;
     }
 
+    /**
+     * Returns the daily (unadjusted) prices for the given symbol.
+     */
     public TimeSeriesResult getDaily(String symbol, String apiKey) throws IOException {
         return client.getTimeSeriesResult(symbol, apiKey);
     }

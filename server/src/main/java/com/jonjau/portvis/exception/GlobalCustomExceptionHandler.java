@@ -17,6 +17,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * When any exception is thrown by the server, it gets handled by this class. This class
+ * returns the appropriate ResponseEntity's to be sent to the client.
+ */
 @ControllerAdvice
 public class GlobalCustomExceptionHandler extends ResponseEntityExceptionHandler {
 

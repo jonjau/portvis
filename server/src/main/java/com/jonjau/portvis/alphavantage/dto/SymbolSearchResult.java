@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Response from the AlphaVantage symbol search endpoint.
+ */
 @Data
 public class SymbolSearchResult {
 

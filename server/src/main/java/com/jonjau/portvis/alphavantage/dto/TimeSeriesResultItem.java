@@ -4,8 +4,11 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * An item in the response from the AlphaVantage time series data endpoint.
+ */
 @Data
-public class TimeSeriesData {
+public class TimeSeriesResultItem {
 
     private BigDecimal open;
     private BigDecimal high;

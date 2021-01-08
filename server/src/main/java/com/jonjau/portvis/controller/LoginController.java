@@ -33,12 +33,15 @@ public class LoginController {
             HttpServletResponse response
     ) {
         String token = userDetailsService.createAuthenticationToken(authenticationRequest);
-
         Cookie cookie = new Cookie(accessTokenCookieName, token);
-        // Delete cookie after 5 hours, to match JWT expiry.
-        // Prevent XSS, and make it global (accessible everywhere)
+
+        // FIXME: Ideally, cookies should be secure. This requires enabling HTTPS.
         //cookie.setSecure(true);
-        cookie.setMaxAge(2*60);
+
+        // Delete cookie after 5 hours, to match JWT expiry.
+        cookie.setMaxAge(5*60*60);
+
+        // Prevent XSS, and make it global (accessible everywhere)
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setDomain("");

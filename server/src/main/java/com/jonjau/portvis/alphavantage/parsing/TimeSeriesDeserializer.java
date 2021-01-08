@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.jonjau.portvis.alphavantage.dto.TimeSeriesData;
+import com.jonjau.portvis.alphavantage.dto.TimeSeriesResultItem;
 import com.jonjau.portvis.alphavantage.dto.TimeSeriesResult;
 
 public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
@@ -22,7 +22,7 @@ public class TimeSeriesDeserializer extends JsonDeserializer<TimeSeriesResult> {
         JsonNode node = objectCodec.readTree(parser);
         timeSeriesResult.setMetaData(DeserializerUtil.getMetaData(node));
         timeSeriesResult.setTimeSeries(DeserializerUtil.getDateObjectMap(
-                node, TimeSeriesData.class));
+                node, TimeSeriesResultItem.class));
         return timeSeriesResult;
     }
 

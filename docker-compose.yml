@@ -16,8 +16,7 @@ services:
     container_name: portvis-server
     build: ./server
     environment: 
-      # Spring boot is expecting database:3306
-      MYSQL_DB_HOST: database
+      MYSQL_DB_HOST: database # 1.
       MYSQL_DB_PORT: 3306
 
       MYSQL_DB_NAME: portvisdb
@@ -30,8 +29,14 @@ services:
 
   client:
     container_name: portvis-client
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
       - server
+
+# 1. This means Spring Boot is expecting database:3306
+# 2. Dockerfile for regular build (building from source code)
+#    Dockerfile.prod to skip RAM-hungry 'npm run build' step
