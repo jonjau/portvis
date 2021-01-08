@@ -2,6 +2,7 @@ package com.jonjau.portvis.security;
 
 import com.jonjau.portvis.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,12 @@ import java.util.Collections;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("${portvis.network.corsAllowedOrigin}")
+    private String corsAllowedOrigin;
+
+    @Value("${portvis.network.devServer}")
+    private String devServer;
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtRequestFilter jwtRequestFilter;
@@ -61,14 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF for this example
         httpSecurity.cors().configurationSource(
                 request -> {
                     // for development purposes allow CORS requests from :3000
                     // this entire configuration section may be omitted in deployment
                     CorsConfiguration cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(Arrays.asList(
-                            "http://localhost:3000", "http://localhost"));
+                    cors.setAllowedOrigins(Arrays.asList(devServer, corsAllowedOrigin));
                     cors.setAllowedMethods(Arrays.asList("GET", "POST","PUT", "DELETE", "OPTIONS"));
                     cors.setAllowedHeaders(Collections.singletonList("*"));
                     cors.setAllowCredentials(true);
@@ -76,6 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 }
         )
                 .and()
+                // FIXME: CSRF PROTECTION IS DISABLED! Enabling will break the login page now...
                 .csrf().disable()
                 // don't authenticate POSTs to login and register
                 .authorizeRequests()
