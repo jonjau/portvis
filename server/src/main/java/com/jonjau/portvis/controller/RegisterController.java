@@ -10,8 +10,6 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/register/")
-//@CrossOrigin
-//@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class RegisterController {
 
     private final JwtUserDetailsService userDetailsService;
