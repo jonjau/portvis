@@ -1,7 +1,20 @@
 # Portvis
 
-A web app that allows users to  visualise and compare simulated
+A full-stack web application that allows users to visualise and compare
 historical returns of US stock portfolios, built with Spring Boot and React.
+
+Inspired by [Portfolio Visualiser](https://www.portfoliovisualizer.com/).
+
+> This application uses the word 'backtest' very loosely. It's really a data
+> visualisation tool.
+
+Low-res demo:
+
+![Demo GIF of the application](doc/demo.gif)
+
+Screenshots are available at
+[`/doc/`](https://github.com/jonjau/portvis/tree/master/client) or
+[here](https://jonjau.github.io/projects/portvis/).
 
 ## Functionalities
 
