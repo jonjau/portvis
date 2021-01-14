@@ -13,7 +13,7 @@ Low-res demo:
 ![Demo GIF of the application](doc/demo.gif)
 
 Screenshots are available at
-[`/doc/`](https://github.com/jonjau/portvis/tree/master/client) or
+[`/doc/`](https://github.com/jonjau/portvis/tree/master/doc) or
 [here](https://jonjau.github.io/projects/portvis/).
 
 ## Functionalities
