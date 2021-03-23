@@ -14,7 +14,7 @@ Low-res demo:
 
 Screenshots are available at
 [`/doc/`](https://github.com/jonjau/portvis/tree/master/doc) or
-[here](https://jonjau.github.io/projects/portvis/).
+[here](https://jonjauhari.me/projects/portvis/).
 
 ## Functionalities
 
